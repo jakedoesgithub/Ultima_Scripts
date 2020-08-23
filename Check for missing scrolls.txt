@@ -1,0 +1,231 @@
+; Title: Check for missing scrolls
+; Author: Jake A.
+; target a vendor bag and it outputs which powerscrolls are missing to %filename variable
+
+set %bag 0
+set %outputdata  Swordsmanship_Fencing_Mace , #spc , Fighting_Archery_Wrestling_Parrying_Tactics_Anatomy_Healing_Magery_Meditation_Evaluate , #spc , Intelligence_Magic , #spc , Resistance_Stealing_Throwing_Stealth_Animal , #spc , Taming_Animal , #spc , Lore_Veterinary_Musicianship_Provocation_Discordance_Peacemaking_Chivalry_Focus_Necromancy_Bushido_Ninjitsu_Spellweaving_Spirit , #spc , speak_Mysticism
+set %filename scrolldata.txt
+set %powerscrollid TVH
+set %scrolllist Swordsmanship_Fencing_Mace , #spc , Fighting_Archery_Wrestling_Parrying_Tactics_Anatomy_Healing_Magery_Meditation_Evaluate , #spc , Intelligence_Magic , #spc , Resistance_Stealing_Throwing_Stealth_Animal , #spc , Taming_Animal , #spc , Lore_Veterinary_Musicianship_Provocation_Discordance_Peacemaking_Chivalry_Focus_Necromancy_Bushido_Ninjitsu_Spellweaving_Spirit , #spc , speak_Mysticism
+set %num 32
+
+gosub main
+halt
+
+
+sub main
+    set #lpc 100
+    gosub openbag
+    wait 1s
+    gosub checkscrolls2
+    wait 1s
+    gosub output2
+    return
+
+sub openbag
+    display select the bag with scrolls
+    set #targcurs 1
+    while #targcurs = 1
+          wait 1s
+    set #lobjectid #ltargetid
+    wait 20
+    event macro 17
+    wait 20
+    set %bag #contid
+    return
+    
+    
+
+sub checkscrolls
+    finditem %powerscrollid C_ , %bag
+    set %index 1
+    set %count #findcnt
+    while %index < %count + 1
+    {
+      set #findindex %index
+      event property #findid
+      set %scrolldata #property
+      set %i 1
+      for %i < %num
+      {
+       str pos %scrolllist _ %i
+       set %start #strres + 1
+       set %i %i + 1
+       str pos %scrolllist _ %i
+       set %stop #strres
+       ; l is length of substring between 2 _
+       set %l %stop - %start
+       str mid %scrolllist %start %l
+       set %scrollname #strres
+       display %scrollname
+       if %scrollname in %scrolldata
+       {
+        str pos %outputdata %scrollname
+        str len %scrollname
+        set %len #strres
+        str del %outputdata %start %len + 1
+        str %outputdata #strres
+        display %outputdata
+       }
+      } ; for end
+      set %index %index + 1
+     } ; while end
+     return
+
+sub checkscrolls2
+    gosub break_string_apart %scrolllist _ scroll
+    set %numscrolls #result
+    finditem %powerscrollid C_ , %bag
+    set %index 1
+    set %count #findcnt
+    for %index 1 %count
+    {
+     set #findindex %index
+     event property #findid
+     set %scrolldata #property
+     set %x 1
+     for %x 1 %numscrolls
+     {
+      set %tmp scroll , %x
+      set %scrollname % . %tmp
+      if %scrollname in %scrolldata
+      {
+        str len %scrollname
+        set %l #strres + 1
+        str pos %outputdata %scrollname
+        str del %outputdata #strres %l
+        set %outputdata #strres
+        
+      }; end if
+     } ; end for
+    }; end for
+    return
+
+sub output
+    execute cmd.exe /c echo  __Missing Scrolls List__ >> %filename
+    set %i 1
+    str len %outputdata
+    set %datalen #strres
+    while %datalen > 4
+    {
+     str pos %outputdata _ %i
+     set %start #strres + 1
+     str pos %outputdata %i + 1
+     set %stop #strres
+     set %l %stop - %start
+     str middle %outputdata %start %l
+     set %s #strres
+     str del %outputdata %start %l + 1
+     set %outputdata #strres
+     execute cmd.exe /c echo %s >> %filename
+     str len %outputdata
+     set %datalen #strres
+    } ; end while
+    display All Done!
+    return
+    
+sub output2
+    execute cmd.exe /c del /f %filename
+    execute cmd.exe /c echo  __Missing Scrolls List__ >> %filename
+    gosub break_string_apart %outputdata _ output
+    set %l #result
+    set %x 1
+    for %x 1 %l
+    {
+     set %tmp output , %x
+     set %output % . %tmp
+     execute cmd.exe /c echo %output >> %filename
+    }
+    display All Done!
+    return
+    
+;==================================
+; Script Name: break_string_apart
+; Author: Orngrimm
+; Version: 1.3
+; Client Tested with: 8th anniversary orig (6.0.1.10 p 72)
+; EUO version tested with: 1.5 b 144
+; Shard OSI / FS: both
+; Revision Date: 21.8.2012
+; Public Release: 28.10.2008
+; Global Variables Used: none
+; Purpose: A sub to break a string apart into multiple parts and store them in an array.
+; The char (breakmark) to break the string can be defined free!
+;==================================
+
+;=========== SUBs =================
+; -------------------------
+; Sub name: break string apart
+; Autor: Orngrimm
+; Version: 1.2
+; Purpose: To brak a string into multiple parts. Breakpoints can be defined
+; Params:	1	req	the string to process
+;		2	req	the sign to break it at
+;		3	opt	name of the array to store the broken parts.
+;				if none is given, "broken" will be assigned.
+; Outputs:	%3[#return]	Array which contains the parts. #Result gives you the ammount of parts.
+; -------------------------
+sub break_string_apart
+  ; Create a new namesapce to have vars at our disposal which
+  ; doesnt clutter the variable-space.
+  nameSpace Push
+  nameSpace Local #sysTime , #random
+  set !old_lpc #LPC
+  set #LPC 500
+  set !string %1
+
+  ; handle the result-array
+  if %0 < 3
+  	set !arrayname broken
+  else
+  	set !arrayname %3
+
+  str pos !string %2
+  set !i 0
+  While #StrRes > 0
+  	{
+  	; we found a breaksign!
+  	set !i !i + 1
+
+  	; where is the breaksign?
+  	set !pos_ #StrRes
+
+  	; where does the word #i end?
+  	set !temp !pos_ - 1
+
+  	; Get the word #i
+  	str left !string !temp
+
+  	; 2-step approach to make an array-cell and fill it.
+  	; Oneliner is not this easy to understand
+  	: 1st: fill a var with the complete name of the var including cell-index: varname[n]
+  	set !temp2 !arrayname , !i
+
+  	; 2nd: transmute the name into a variable and fill it
+  	set % . !temp2 #StrRes
+  	; We got one word into the array
+
+  	str del !string 1 !pos_
+  	set !string #StrRes
+  	; word #i including _ is removed from string
+
+  	; Perform search to satisfy while-loop
+  	str pos !string %2
+  	}
+  ; Process rest at the end (which doesnt have a breakpoint anymore)
+  set !i !i + 1
+
+  set !temp2 !arrayname , !i
+  set % . !temp2 !string
+
+  set %temp !i
+  ; restore old LPC and namespace
+  set #LPC !old_lpc
+  nameSpace Clear
+  nameSpace Pop
+  return %temp
+  ;=========== End SUBs =============
+
+
+    
+    
