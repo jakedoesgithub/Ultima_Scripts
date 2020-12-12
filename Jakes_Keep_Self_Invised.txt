@@ -1,0 +1,17 @@
+; Jakes Keep Self Invised
+; Casts invis on self every 60 seconds
+
+
+gosub main
+stop
+
+sub main
+	while #true
+	{
+	 event macro 15 43
+    	 target 3s
+    	 event macro 23 0
+    	 wait 90s
+	}
+    	return
+    

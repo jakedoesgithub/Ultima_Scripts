@@ -1,0 +1,13 @@
+repeat
+{
+ event macro 8 16
+ set %i 0
+repeat
+{
+ event macro 16
+ wait 3s
+ set %i %i + 1
+}
+until %i = 20
+}
+until #false

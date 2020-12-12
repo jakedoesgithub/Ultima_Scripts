@@ -1,0 +1,125 @@
+; Jake's BOD Filler
+; calls s7BodFiller to fill BODs
+
+namespace push
+namespace local _jakebodfiller
+gosub main
+stop
+
+sub main
+    set #lpc 100
+    set %secureboxid 0
+    set %finishedbodbookid 0
+    set %tofillbodbookid 0
+    set %numbods
+    gosub getVariables
+    gosub getNumBODs
+    for !i 1 %numbods
+    {
+        ;display enterd fill bod loop from main
+     gosub fillBOD
+    }
+    display All Done!
+    return
+
+; %1 is the variable to save BOD book
+sub getVariables
+     ;display entered getvariables
+    display Select the secure with the materials
+    set #targcurs 1
+    target 4s
+    while #targcurs > 0
+          wait 1s
+    set %secureboxid #ltargetid
+    set #lobjectid %secureboxid
+    event macro 17
+    wait 20
+    set #CONTPOSX 1203
+    set #CONTPOSY 609
+    set #NEXTCPOSX 50
+    set #NEXTCPOSY 50
+    wait 20
+    display Select the BOD book with the unfilled BODs
+    set #targcurs 1
+    target 4s
+    while #targcurs > 0
+          wait 1s
+    set %tofillbodbookid #ltargetid
+    wait 20
+    display Select BOD book to place finished BODs
+    set #targcurs 1
+    while #targcurs > 0
+          wait 1s
+    set %finishedbodbookid #ltargetid
+    wait 20
+    return
+
+sub getNumBODs
+    namespace push
+    namespace local _numbodsvars
+    event property %tofillbodbookid
+    set %bookdata #property
+    str lower %bookdata
+    set %bookdata #strres
+        ;display bookdata %bookdata
+    str pos %bookdata : 2
+    set !start #strres + 1
+    str pos %bookdata book 3
+    set !end #strres - 1
+    set !num  !end - !start
+    str mid %bookdata !start !num
+    set %numbods #strres
+        ;display numbods %numbods
+    str len %numbods
+    set !num #strres - 2
+    str mid %numbods !num
+    str %numbods #strres
+        ;display numbods %numbods
+    namespace clear
+    namespace pop
+    return
+
+sub fillBOD
+     namespace push
+     namespace local _fillbod
+     set #lobjectid %tofillbodbookid
+     event macro 17
+     wait 20
+     set !x #CONTPOSX + 42
+     set !y #CONTPOSY + 104
+     click !x !y dmc
+     wait 20
+     set !x #CONTPOSX + 35
+     set !y #CONTPOSY + 80
+     click !x !y r dmc
+     wait 20
+     finditem EYM C_ , #backpackid
+     set %bodid #findid
+     call s7BODFiller.euo %bodid %secureboxid #false
+     wait 20
+     Exevent drag %bodid
+     wait 20
+     Exevent dropc %finishedbodbookid
+     wait 20
+     namespace clear
+     namespace pop
+     return
+     
+gosub resetFilter
+      namespace push
+     namespace local _resetFilter
+     set #nextcposx 50
+     set #nextcposy 50
+     set #lobjectid %tofillbodbookid
+     event macro 17
+     wait 1s
+     set #nextcposx 50
+     set #nextcposy 50
+     set !x #CONTPOSX + 50
+     set !y #CONTPOSY + 43
+     click !x !y dmc
+     wait 20
+     set !x #CONTPOSX + 347
+     set !y #CONTPOSY + 687
+     click !x !y dmc
+     wait 20

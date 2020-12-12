@@ -1,0 +1,772 @@
+;Jakes miner
+;purpose: teleports around following rails to mine stuff
+; todo get iron ingots before crafting items in check needs
+; - save up ingot after done crafting items
+; - add getting fire beetle id to setup
+; - create mine sub to mine around character (check n, s, e , w tiles? or all?)
+; - invidual pathfinding around each mine location
+; - check journal for when ore is out
+; - sub to check weight
+; - sub to smelt on beetle
+; -------------------------
+
+;ignoreitem #charid
+;helpful variables
+set *location not started
+set %oretypes DWJ_GWJ_EWJ_TVJ_DWJ
+set %gemtypes ZWS_VWS_AXS_FWF_UVF_TWS_GXS_UWS_GWF_EWF
+set %stonetypes BVI
+set %ingottypes ENK
+set %fire_beetle_type JJ
+set %small_crate_type ZTD
+set %bag_type CKF
+set %tinker_tool_type JTL
+set %iron_ingot_id WTWHRPD
+set %shovel_type WWF
+set %maxweight 300
+
+;item ids
+;runebook
+set %runebook_id 0
+set %supply_crate 0
+set %firebeetle 0
+set %bag 0
+set %shovel_broke 0
+set %strangers 0
+set %enemy 0
+set %outore 0
+set %shovel 0
+
+
+;mining variables
+set %yewcaverune 2
+set %yewcavexx 996_997_990_992_995_998_1002_1001_1006_1009_
+set %yewcaveyy 1594_1589_1589_1584_1580_1578_1582_1587_1588_1593_
+set %yewcavezz 0_0_0_0_0_0_0_0_0_0_
+set %cave1caverune 3
+set %cave1cavexx 1497_1494_1492_
+set %cave1caveyy 2830_2835_2851_
+set %cave1cavezz 0_0_0_
+set %cave2caverune 4
+set %cave2cavexx 1417_1422_1421_1425_1426_1430_
+set %cave2caveyy 2890_2890_2886_2881_2886_2882_
+set %cave2cavezz 0_0_0_0_0_0_
+set %decietcaverune 5
+set %decietcavexx 4061_4056_4052_4048_4046_4034_4029_4023_4028_4038_4045_4049_4050_4046_4041_4039_4034_4029_
+set %decietcaveyy 439_439_437_439_434_434_431_434_438_436_442_447_454_459_460_464_465_462_
+set %decietcavezz 3_3_3_3_3_3_3_3_3_3_3_3_3_3_3_3_3_
+set %wtrinsiccaverune 6
+set %wtrinsiccavexx 1648_1648_1649_1651_1653_1657_1661_
+set %wtrinsiccaveyy 2893_2900_2910_2916_2923_2933_2934_
+set %wtrinsiccavezz 0_0_0_0_0_0_0
+set %shamecaverune 8
+set %shamecavexx 356_354_350_351_354_357_362_360_358_363_367_373_376_378_381_385_385_380_
+set %shamecaveyy 1459_1455_1453_1448_1449_1451_1447_1440_1436_1439_1436_1439_1444_1440_1437_1433_1430_
+set %shamecavezz 1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_1_
+set %bucsrune 9
+set %bucsxx 2659_2660_2654_2647_2639_2627_2627_2627_2619_2613_2618_2627_2627_2627_2629_2636_2635_2635_2644_2635_2636_2643_2645_2645_2646_2644_2638_2631_2622_2616_2611_2606_2604_2609_2605_2600_2596_2603_2604_2610_2615_2622_2635_2644_2644_2674_2681_2688_2696_2709_2715_2721_2728_2731_2738_2745_2748_2754_2758_2756_2763_
+set %bucsyy 2267_2258_2259_2259_2259_2256_2246_2233_2226_2226_2220_2217_2207_2198_2190_2194_2186_2175_2160_2175_2168_2161_2152_2145_2137_2127_2123_2123_2123_2116_2119_2113_2107_2102_2096_2090_2085_2080_2069_2071_2060_2059_2059_2058_2052_2059_2064_2061_2059_2059_2064_2060_2060_2066_2063_2062_2074_2076_2083_2090_2095_
+set %bucszz -20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_-20_
+
+repeat
+{
+ gosub main
+ wait 5s
+}
+until #false
+
+sub main
+    set *location main
+    gosub setup
+    gosub saveresources
+    gosub checkNeeds
+    gosub beginMining
+    return
+
+sub quitmining
+    set *location quitmining
+    gosub returntostart
+    stop
+
+sub saveResources
+    set *location saveresources
+    ; save iron ingots works
+    ;display in save resources
+    finditem %ingottypes , _ , %gemtypes , _ , %stonetypes C_ , #backpackid
+    ;display #findcnt
+    if #findcnt > 0
+    {
+      set %num #findcnt
+      for %i 1 %num
+      {
+       set #findindex %i
+       gosub dragndrop #findid #findstack %supply_crate
+       wait 20
+      }
+    }
+    ;finditem %gemtypes C_ , #backpackid
+    ;display #findcnt
+    ;if #findcnt > 0
+    ;{
+      ;set %num #findcnt
+      ;for %i 1 %num
+      ;{
+       ;set #findindex %i
+       ;gosub dragndrop #findid #findstack %supply_crate
+       ;wait 20
+      ;}
+    ;}
+    return
+
+
+sub beginMining
+    set *location beginmining
+     gosub minecave %yewcaverune %yewcavexx %yewcaveyy %yewcavezz
+     gosub returntostart
+     gosub saveresources
+     gosub checkneeds
+     gosub minecave %cave1caverune %cave1cavexx %cave1caveyy %cave1cavezz
+     gosub returntostart
+     gosub saveresources
+     gosub checkneeds
+     gosub minecave %cave2caverune %cave2cavexx %cave2caveyy %cave2cavezz
+     gosub returntostart
+     gosub saveresources
+     gosub checkneeds
+     ;gosub minecave %decietcaverune %decietcavexx %decietcaveyy %decietcavezz
+     ;gosub returntostart
+    ; gosub saveresources
+     ;gosub checkneeds
+     gosub minecave %wtrinsiccaverune %wtrinsiccavexx %wtrinsiccaveyy %wtrinsiccavezz
+     gosub returntostart
+     gosub saveresources
+     gosub checkneeds
+     gosub minecave %shamecaverune %shamecavexx %shamecaveyy %shamecavezz
+     gosub returntostart
+     gosub saveresources
+     gosub checkneeds
+     gosub minecave %bucsrune %bucsxx %bucsyy %bucszz
+     gosub returntostart
+     gosub saveresources
+     gosub checkneeds
+    return
+
+sub minismelt
+    set *location minismelt
+    gosub dismount
+    finditem %oretypes C_ , #backpackid
+    for %p 1 #findcnt
+    {
+        set #findindex %p
+        set #lobjectid #findid
+        event macro 17
+        target 3s
+        wait 20
+        set #ltargetkind 1
+        set #ltargetid %firebeetle
+        event macro 22
+        wait 1s
+    }
+    return
+    
+sub smeltonbeetle
+    set *location smeltonbeetle
+    gosub dismount
+    finditem %oretypes C_ , #backpackid
+    for %p 1 #findcnt
+    {
+        set #findindex %p
+        set #lobjectid #findid
+        event macro 17
+        target 3s
+        wait 20
+        set #ltargetkind 1
+        set #ltargetid %firebeetle
+        event macro 22
+        wait 1s
+    }
+    finditem %ingottypes G_2
+    for %p 1 #findcnt
+    {
+     set #findindex %p
+     gosub dragndrop #findid #findstack #backpackid
+     wait 20
+    }
+    if #weight > #maxweight - 60
+    {
+      finditem %oretypes C_ , #backpackid
+      while #findcnt > 0
+      {
+       gosub minismelt
+      }
+      gosub mount
+      wait 20
+      gosub marksaverune
+      wait 50
+      gosub returntostart
+      wait 40
+      gosub saveresources
+      wait 40
+      gosub checkneeds
+      wait 40
+      gosub runebookrecall 10
+      wait 40
+      gosub dismount
+      wait 20
+    }
+    return
+    
+sub getnewshovel
+    set *location getnewshovel
+    ;set #ltargetkind 1
+    finditem %shovel_type C_ , #backpackid
+    if #findcnt < 3
+    {
+     gosub minismelt
+     wait 20
+     gosub minismelt
+     wait 20
+     gosub mount
+     wait 20
+     gosub marksaverune
+     wait 100
+     gosub returntostart
+     wait 20
+     gosub saveresources
+     wait 20
+     gosub checkneeds
+     wait 20
+     gosub runebookrecall 10
+     wait 4s
+     gosub dismount
+    }
+    finditem %shovel_type C_ , #backpackid
+    set %shovel #findid
+    return
+
+;used when out of shovels to leave and come back
+
+sub marksaverune
+    set *location marksaverune
+    set #lobjectid %runebook_id
+    event macro 17
+    wait 20
+    set %clickx #contposx + 308
+    set %clicky #contposy + 195
+    click %clickx %clicky dmc
+    wait 20
+    set %clickx #contposx + 298
+    set %clicky #contposy + 119
+    click %clickx %clicky dmc
+    wait 20
+    finditem QWL C_ , #backpackid
+    set #ltargetid #findid
+    set %runeid #findid
+    event macro 15 44
+    target 5s
+    set #ltargetkind 1
+    event macro 22
+    wait 3s
+    set #jindex 1
+    scanjournal 1
+    if fizzles in #journal
+    {
+      set #ltargetid %runeid
+      event macro 15 44
+      target 5s
+      set #ltargetkind 1
+      event macro 22
+      wait 4s
+      set #jindex 1
+      scanjournal 1
+    }
+    wait 20
+    gosub dragndrop %runeid 1 %runebook_id
+
+
+sub checkweight
+    set *location checkweight
+    if #weight > #maxweight
+    {
+       gosub smeltonbeetle
+    }
+    return
+    
+;mines the ground once
+;%1 x value
+;%2 y valye
+;%3 z value
+sub minespot
+    set *location minespot
+    set %xx %1
+    set %yy %2
+    while #enemyid <> N/A
+     {
+      set #ltargetid #enemyid
+      set #ltargetkind 1
+      event macro 15 41
+      target 3s
+      event macro 22
+      wait 10
+     }
+    finditem %shovel C_ , #backpackid
+    if #findcnt < 1
+    {
+     gosub getnewshovel
+    }
+   ; display in mine spot
+    ;display %1 %2 %3
+   set #lobjectid %shovel
+   event macro 17
+   target 3s
+   ;display %1 %2
+   ;set #ltargetkind 3
+   click %xx %yy dmc
+   ;set #ltargetkind 1
+   wait 1s
+   if no_metal in #sysmsg || can't_mine in #sysmsg
+   {
+    set %outore 1
+   }
+   if destroyed in #sysmsg
+   {
+    set %shovel_broke 1
+   }
+   return
+
+
+; Mines a place
+; %1 runebook number
+; %2 list of x coordinates
+; %3 list of y coordinated
+; %4 list of z coordinates
+sub minecave
+    set #enemyid N/A
+    finditem %shovel_type C_ , #backpackid
+    set %shovel #findid
+    
+    set *location minecave
+    gosub runebookrecall %1
+;    gosub checkstrange
+     wait 2s
+     while #enemyid <> N/A
+     {
+      set #ltargetid #enemyid
+      set #ltargetkind 1
+      event macro 15 41
+      target 3s
+      event macro 22
+      wait 10
+     }
+    set %spotxx %2
+    set %spotyy %3
+    set %spotzz %4
+    wait 2s
+    set %spotxxlen 50
+    ; this loop loops through each coordinate included in the spotxx spotyy spot zz vars and mines at that coordinate
+    while %spotxxlen > 1
+    {
+     gosub getnextspot
+     event pathfind %spotx %spoty %spotz
+     wait 5s
+     event macro 5 0
+     gosub dismount
+      set %x1 360
+      set %y1 285
+      set %x2 405
+      set %y2 220
+      set %x3 408
+      set %y3 322
+      set %x4 444
+      set %y4 270
+      set %minen 1
+      ;gebin mining the 4 tiles N S E W of player
+      while %minen < 5
+      {
+            ; display %minen
+        set %enemy 0
+        set %tmpminex %x . %minen
+        set %tmpminey %y . %minen
+        set %outore 0
+        set %minemaxer 0
+        while %outore < 1 && %minemaxer < 30 ; && %enemy < 1 &&  %strangers < 1
+        {
+         if %shovel_broke = 1
+         {
+           gosub getnewshovel
+         }
+         gosub minespot %tmpminex %tmpminey
+         if %enemy > 0
+         {
+          return
+         }
+          ;gosub checkstrangers
+         gosub checkweight
+         set %minemaxer %minemaxer + 1
+        }
+;        if %strangers > 0 || %enemy > 1
+;       {
+;         return
+;       }
+        set %minen %minen + 1
+      }
+      gosub mount
+      wait 20
+    }
+    return
+    
+    
+sub checkstrange
+    set *location checkstrange
+    finditem HS_IS_NAB_OAB_QAB_PAB_MAB_RAB_SAB_LAB_XU_AV G_8
+    if #findcnt > 1
+    {
+     set %strangers 1
+    }
+    return
+
+    
+sub getnextspot
+    set *location getnextspot
+    str pos %spotxx _
+    set %n #strres
+    set %tmp %n - 1
+    str mid %spotxx 1 %tmp
+    set %spotx #strres
+    str del %spotxx 1 %n
+    set %spotxx #strres
+    str len %spotxx
+    set %spotxxlen #strres
+    str pos %spotyy _
+    set %n #strres
+    set %tmp %n - 1
+    str mid %spotyy 1 %tmp
+    set %spoty #strres
+    str del %spotyy 1 %n
+    set %spotyy #strres
+    str pos %spotzz _
+    set %n #strres
+    set %tmp %n - 1
+    str mid %spotzz 1 %tmp
+    set %spotz #strres
+    str del %spotzz 1 %n
+    set %spotzz #strres
+    return
+    
+;checks to see if have 15 shovels and 2 tinker kits
+sub checkNeeds
+    namespace push
+    namespace local _checkneeds
+    set *location checkneeds
+    ;display in check needs
+    ; get 200 iron ingots from chest and put in backpack
+    set #lobjectid %supply_crate
+    event macro 17
+    wait 20
+    set !clickx #contposx + 50
+    set !clicky #contposy + 50
+    finditem %ingottypes C_ , %supply_crate
+    for !ing 1 #findcnt
+    {
+      set #findindex !ing
+      event property #findid
+      if copper in #property || shadow in #property || bronze in #property || gold in #property || agapite in #property || verite in #property || valorite in #property
+      {
+       continue
+      }
+      else
+      {
+        set !ingid #findid
+        break
+      }
+    }
+    gosub dragNdrop !ingid 200 #backpackid
+    wait 20
+
+    
+    ;replace tinekrtopols if none in pack, craft so have 3 tinker tools
+    finditem %tinker_tool_type C_ , #backpackid
+    if #findcnt < 1
+    {
+     ;open supply crate
+     set #lobjectid %supplycrate
+     set #nextcposx 50
+     set #nextcposy 50
+     event macro 17
+     wait 40
+     ;open backup bag in crate
+     set #lobjectid %bag
+     set #nextcposx 50
+     set #nextcposy 50
+     event macro 17
+     wait 40
+     ; grab tinker tools out and put in backpack
+     finditem %tinker_tool_type C_ , #lobjectid
+     gosub dragndrop #findid 1 #backpackid
+     wait 20
+    }
+    
+    ; craft until theres 3 tinkertools in backpack
+    finditem %tinker_tool_type C_ , #backpackid
+    while #findcnt < 3
+    {
+     gosub craftTinkerKit
+     finditem %tinker_tool_type C_ , #backpackid
+    }
+
+    ;check for 17 shovels
+    finditem %shovel_type C_ , #backpackid
+    while #findcnt < 17
+    {
+     gosub craftShovel
+     finditem %shovel_type C_ , #backpackid
+    }
+    
+    ; place remaining ingots back in crate
+    finditem %ingottypes C_ , #backpackid
+    gosub dragNdrop #findid #findstack %supply_crate
+    wait 20
+    click !clickx !clicky r dmc
+    wait 20
+    finditem %shovel_type C_ , #backpackid
+    set %shovel #findid
+    namespace clear
+    namespace pop
+    return
+    
+sub craftShovel
+    set *location craftshovel
+    namespace push
+    namespace _craftShovel
+    set !shovel_buttonx 234
+    set !shovel_buttony 72
+    set !next_buttonx 387
+    set !next_buttony 271
+
+    finditem %tinker_tool_type C_ , #backpackid
+    set #findcnt
+    set #lobjectid #findid
+    event macro 17
+    wait 20
+    set !clickx #contposx + !next_buttonx
+    set !clicky #contposy + !next_buttony
+    click !clickx !clicky dmc
+    wait 20
+    set !clickx #contposx + !shovel_buttonx
+    set !clicky #contposy + !shovel_buttony
+    click !clickx !clicky dmc
+    wait 3s
+    click !clickx !clicky r dmc
+    wait 1s
+    namespace clear
+    namespace pop
+    return
+
+    
+sub craftTinkerKit
+    set *location craftinkerkit
+    namespace push
+    namespace _craftTinkerTools
+    set !tink_tools_buttonx 232
+    set !tink_tools_buttony 130
+    
+    finditem %tinker_tool_type C_ , #backpackid
+    set #lobjectid #findid
+    event macro 17
+    wait 20
+    set !clickx #contposx + !tink_tools_buttonx
+    set !clicky #contposy + !tink_tools_buttony
+    click !clickx !clicky dmc
+    wait 3s
+    click !clickx !clicky r dmc
+    wait 1s
+    namespace clear
+    namespace pop
+    return
+
+;sets up different script variables
+sub setup
+    set #ltargetkind 1
+    set *location setup
+    ;open backpack
+    event macro 8 7
+    wait 20
+    set #contposx 843
+    set #contposy 363
+    wait 10
+    
+    
+    ;open status
+    event macro 8 2
+    wait 20
+    set #contposx 843
+    set #contposy 595
+    wait 20
+    
+    ;set runebook
+    finditem ZBN C_ , #backpackid
+    set %runebook_id #findid
+    gosub returnToStart
+    wait 1s
+    
+    ;setup variables
+    ;set supply crate
+    finditem %small_crate_type G_2
+    set %supply_crate #findid
+    set #lobjectid %supply_crate
+    set #NEXTCPOSX 50
+    set #NEXTCPOSY 50
+    event macro 17
+    wait 20
+    
+    ;set bag
+    finditem %bag_type %small_crate
+    set %bag #findid
+    click 100 100 r dmc
+    wait 20
+    
+    ;get firebeetleid
+    set #lobjectid #charid
+    event macro 17
+    wait 20
+    finditem JJ G_2
+    set %firebeetle #findid
+    set #lobjectid %firebeetle
+    event macro 17
+    wait 20
+
+    return
+
+sub mount
+    set #ltargetkind 1
+    set *location mount
+    set #lobjectid %firebeetle
+    event macro 17
+    wait 20
+    return
+    
+sub dismount
+    set #ltargetkind 1
+    set *location dismount
+    set #lobjectid #charid
+    event macro 17
+    wait 20
+    return
+;brings the character back to the beginning to start script
+sub returnToStart
+    set #ltargetkind 1
+    set *location returntostart
+    gosub runebookrecall 1
+    wait 1s
+    if #charDir > 0
+    {
+      event macro 5 1
+      wait 20
+    }
+    event macro 5 1
+    wait 10
+    event macro 5 1
+    wait 3s
+    return
+
+;---------------------------------------------------------------------------------------------
+;Runebook Recall
+';Use this when you need to recall to a certain rune in a runebook.
+;param %1  - the number of the rune in the book
+;this works for runebook, not runic atlases
+;---------------------------------------------------------------------------------------------
+sub runebookrecall
+    set *location runebookrecall
+    ;display in sub runebook recall
+    namespace push
+    namespace local _runebookrecall
+    ; finding x y variables for navigational clicks in rubnebook
+    set !page %1 / 2
+
+    if %1 % 2 = 0
+    {
+      set !recallx 299
+      set !recally 144
+    }
+    else
+    {
+      set !recallx 139
+      set !recally 143
+      set !page !page + 1
+    }
+
+    ;set !pagex 140
+    set !pagey 196
+    set !pagex1 139
+    set !pagex2 172
+    set !pagex3 209
+    set !pagex4 246
+    set !pagex5 308
+    set !pagex6 344
+    set !pagex7 380
+    set !pagex8 414
+
+    set !pagex !pagex . !page
+
+    ;save x and y location to compare and see if recall occured
+    set !posx #charposx
+    set !posy #charposy
+
+
+    while #charposx = !posx && #charposy = !posy
+    {
+      ;open runebook
+      set #lobjectid %runebook_id
+      event macro 17
+      wait 20
+
+      ; click to open to page number
+      set !clickx #CONTPOSX + !pagex
+      set !clicky #CONTPOSY + !pagey
+      click !clickx !clicky dmc
+      wait 20
+
+      ; click the recall button on page
+      set !clickx #CONTPOSX + !recallx
+      set !clicky #CONTPOSY + !recally
+      click !clickx !clicky dmc
+      wait 2s
+      if art_too_encumbered in #sysmsg
+      {
+       gosub dismount
+       wait 20
+       gosub minismelt
+       wait 30
+       gosub mount
+       wait 20
+      }
+      wait 2s
+    }
+    namespace clear
+    namespace pop
+    return
+
+;-----------------------------------------------------------------------------------------------
+;Drag N Drop Sub
+';Use this when you need to drag and dro an item somewhere on a container, stack, whatever.
+;param %1  - itemid to drag
+;param %2 -  amouunt of item to drag (just enter 1 if its nota stackable item)
+; param %3 - itemid, containerid , or whatever you want to drop item on.
+; optional params %4 and %5 are the x and y coordinates to drop the item at in the container
+;---------------------------------------------------------------------------------------------
+sub dragNdrop
+    set *location dragndrop
+    if %0 < 2 || %0 > 5
+    {
+      display Please fix parameters for dragNdrop and try again
+    }
+
+    Exevent Drag %1 %2
+    wait 10
+    if %0 > 3
+       Exevent Dropc %3 %4 %5
+    else
+        Exevent Dropc %3
+    wait 10
+    return
+    

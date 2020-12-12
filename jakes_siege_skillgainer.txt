@@ -1,0 +1,111 @@
+; Jakes Seige Skill gainer
+; use a scroll of alacrity first then this logs on and uses a skill then logs off
+set %username thufir
+set %pass 457ardoin457
+;set %skill NECR ;necro
+set %skillmax 1000
+set %skill MAGE  ;Magery
+
+set %userx 404
+set %usery 296
+set %passx 408
+set %passy 350
+set %loginx 316
+set %loginy 380
+set %spx 190
+set %spy 431
+set %char1x 371
+set %char1y 141
+set %logoutx 977 ;for thufir account
+set %logouty 118 ; for thufir account
+set %quitokx 874
+set %quitoky 526
+set %runebookid ZBN
+
+set %quitvar 0
+
+repeat
+{
+ gosub main
+}
+until %quitvar > 0
+stop
+
+sub main
+    set #lpc 100
+    click %passx %passy dmc
+    for %i 1 20
+    {
+      key BACK
+    }
+    set %x %pass
+    str len %x
+    set %y #strres
+    for %i 1 %y
+    {
+     str left %x 1
+     key #strres
+     str del %x 1 1
+     set %x #strres
+    }
+    wait 1s
+    click %loginx %loginy dmc
+    wait 5s
+    click %spx %spy dmc
+    wait 5s
+    click %char1x %char1y dmc x 2
+    wait 5s
+    
+    ; after logged in
+    chooseskill %skill
+    set %s #skill
+    if #skill < 1200
+    {
+      set %delay 910s
+    }
+    if #skill < 1000
+    {
+      set %delay 730s
+    }
+    if #skill < 900
+    {
+      set %delay 490s
+    }
+    if #skill < 800
+    {
+      set %delay 310s
+    }
+    set %mana #mana
+    while %s = #skill
+    {
+     ;event macro 15 115 ; casts wither
+     finditem %runebookid C_ , #backpackid
+     set #ltargetkind 1
+     set #ltargetid #findid
+     event macro 15 51 ; casts gate
+     target 4s
+     event macro 22
+     wait 2s
+    }
+    set %quitvar 1
+    if %skillmax > #skill
+    {
+      set %quitvar 0
+    }
+    event macro 8 1 ;opens paperdoll
+    wait 20
+    set #contposx 766
+    set #contposy 9
+    wait 20
+    click %logoutx %logouty dmc ;clicks logout
+    wait 20
+    click %quitokx %quitoky dmc
+    wait %delay
+    return
+    
+    
+    
+
+
+
+

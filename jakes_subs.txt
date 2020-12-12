@@ -1,0 +1,125 @@
+;-----------------------------------------------------------------------------------------------
+;Drag N Drop Sub
+';Use this when you need to drag and dro an item somewhere on a container, stack, whatever.
+;param %1  - itemid to drag
+;param %2 -  amouunt of item to drag (just enter 1 if its nota stackable item)
+; param %3 - itemid, containerid , or whatever you want to drop item on.
+; optional params %4 and %5 are the x and y coordinates to drop the item at in the container
+;---------------------------------------------------------------------------------------------
+sub dragNdrop
+    if %0 < 2 || %0 > 5
+    {
+      display Please fix parameters for dragNdrop and try again
+    }
+
+    Exevent Drag %1 %2
+    wait 10
+    if %0 > 3
+       Exevent Dropc %3 %4 %5
+    else
+        Exevent Dropc %3
+    wait 10
+    return
+
+;-----------------------------------------------------------------------------------------------
+;---------------------------------------------------------------------------------------------
+;Give BOD To Vendor
+';Use this when you need to drag and dro an item somewhere on a container, stack, whatever.
+;param %1  - bod id to turn in
+;param %2 -  vendor id to give bod to
+; future changes to parse the bod and refrence file for possible of rewards and to check
+; which rewards you are after to select the reward obtained
+;currently just works with autobank for points
+;---------------------------------------------------------------------------------------------
+sub turnInBOD
+    if %0 < 2 || %0 > 5
+    {
+      display Please fix parameters for dragNdrop and try again
+    }
+
+    Exevent Drag %1 @
+    wait 10
+    if %0 > 3
+       Exevent Dropc %2 %3 %4
+    else
+        Exevent Dropc %2
+    wait 10
+    gosub closegump
+    wait 10
+    return
+
+
+;Close Gump
+; closes a gump by right clicking on it
+sub closegump
+    set %cx #contposx + 10
+    set %cy #contposy + 10
+    click %cx %cy f r dmc
+    wait 10
+    return
+
+;---------------------------------------------------------------------------------------------
+;Runebook Recall
+';Use this when you need to recall to a certain rune in a runebook.
+;param %1  - the number of the rune in the book
+;this works for runebook, not runic atlases
+;---------------------------------------------------------------------------------------------
+
+sub runebookrecall
+    namespace push
+    namespace local _runebookrecall
+    ; finding x y variables for navigational clicks in rubnebook
+    set !page %1 / 2
+
+    if %1 % 2 = 0
+    {
+      set !recallx 299
+      set !recally 144
+    }
+    else
+    {
+      set !recallx 139
+      set !recally 143
+      set !page !page + 1
+    }
+
+    ;set !pagex 140
+    set !pagey 196
+    set !pagex1 139
+    set !pagex2 172
+    set !pagex3 209
+    set !pagex4 246
+    set !pagex5 308
+    set !pagex6 344
+    set !pagex7 380
+    set !pagex8 414
+
+    set !pagex !pagex . !page
+
+    ;save x and y location to compare and see if recall occured
+    set !posx #charposx
+    set !posy #charposy
+
+
+    while #charposx = !posx && #charposy = !posy
+    {
+      ;open runebook
+      set #lobjectid %runebook_id
+      event macro 17
+      wait 20
+
+      ; click to open to page number
+      set !clickx #CONTPOSX + !pagex
+      set !clicky #CONTPOSY + !pagey
+      click !clickx !clicky dmc
+      wait 20
+
+      ; click the recall button on page
+      set !clickx #CONTPOSX + !recallx
+      set !clicky #CONTPOSY + !recally
+      click !clickx !clicky dmc
+      wait 4s
+    }
+    namespace clear
+    namespace pop
+    return

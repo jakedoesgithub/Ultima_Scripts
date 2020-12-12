@@ -1,0 +1,53 @@
+set %x1 5827
+set %y1 227
+set %z1 -3
+set %x2 5827
+set %y2 243
+set %z2 -4
+set %x3 5803
+set %y3 243
+set %z3 -2
+set %x4 5807
+set %y4 227
+set %z4 -2
+
+set %ogre TH
+finditem %ogre G_20
+
+repeat
+{
+  finditem %ogre G_20
+  while #finddist > 4
+  {
+    wait 10
+    finditem %ogre G_20
+  }
+  event pathfind %x1 %y1 %z1
+  wait 9s
+  finditem %ogre G_20
+  while #finddist > 4
+  {
+    wait 10
+    finditem %ogre G_20
+  }
+  event pathfind %x2 %y2 %z2
+  wait 9s
+  finditem %ogre G_20
+  while #finddist > 4
+  {
+    wait 10
+    finditem %ogre G_20
+  }
+  event pathfind %x3 %y3 %z3
+  wait 9s
+  finditem %ogre G_20
+  while #finddist > 4
+  {
+    wait 10
+    finditem %ogre G_20
+  }
+  event pathfind %x4 %y4 %z4
+  wait 9s
+
+}
+until #false

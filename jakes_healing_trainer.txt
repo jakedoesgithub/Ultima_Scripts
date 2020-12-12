@@ -1,0 +1,66 @@
+; Jakes heal trainer
+; set dress to f5, dress just a single +hp item, set undress to f7.
+; the sklillmax variable to the max skill you want to get to
+; and have lots of bandies
+
+set %hpitemtype CPD
+set %skillmax 1000
+
+set %bandtype ZLF
+
+gosub main
+display done
+
+sub main
+    chooseskill heal
+    while #skill < %skillmax
+    {
+      key F5
+      wait 1s
+      finditem %bandtype C_ , #backpackid
+      set #lobjectid #findid
+      event macro 17
+      wait 20
+      set #ltargetid #charid
+      event macro 22
+      wait 4s
+      key F7
+      wait 1s
+    }
+    
+;-----------------------------------------------------------------------------------------------
+;Drag N Drop Sub
+';Use this when you need to drag and dro an item somewhere on a container, stack, whatever.
+;param %1  - itemid to drag
+;param %2 -  amouunt of item to drag (just enter 1 if its nota stackable item)
+; param %3 - itemid, containerid , or whatever you want to drop item on. for paperdoll put d here
+; optional params %4 and %5 are the x and y coordinates to drop the item at in the container
+;---------------------------------------------------------------------------------------------
+sub dragNdrop
+    set *location dragndrop
+    if %0 < 2 || %0 > 5
+    {
+      display Please fix parameters for dragNdrop and try again
+    }
+
+    Exevent Drag %1 %2
+    wait 10
+    if %0 > 3
+    {
+       Exevent Dropc %3 %4 %5
+       wait 20
+       return
+    }
+    if %3 = d || %3 = D
+    {
+       Exevent Droppd
+       wait 20
+       return
+    }
+    else
+    {
+        Exevent Dropc %3
+        wait 20
+        return
+    }
+

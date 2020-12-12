@@ -1,0 +1,111 @@
+;-----------------------------------------------------------
+; Script Name: Jake's Detect Hidden House Trainer
+; Author: jake2237
+; Version: 1.0.2
+; Client Tested with:  7.0.86.2
+; EUO version tested with: 1.6.0.335
+; Shard OSI
+; Revision Date: 8/24/20
+; Public Release: 8/18/20
+; Purpose: Trains Detect Hidden to gm using trapped box locked down in home
+; When it gets too easy for optimal gains (as told via crystal ball of knowledge)
+; it will take 1 step to the south, thereby increasing the difficulty of the detect hidden skill check.
+; Copyright: This script is free to steal or alter any way you see fit as long as you give me credit for it.
+;-------------------------------------------------------------
+;Revisions
+; 1.0.3 - Changed an if statement when checking for skill at skillcap
+; 1.0.2 - Added variable to choose max skill to raise Detect Hidden to
+;       - Fixed script so it no longer infinitely looped a sub
+;-------------------------------------------------------------
+; Instructions:
+; 1. If you want Detect Hidden to max out at something other than 100.0 skill points,
+;     change the variable %maxskill below to the max skill you want. For example 442 is 44.2 points
+; 2. Buy detect hidden from theif guildmaster in New haven as much as he will sell (about 35-ish).
+;    If you cant find him dont worry about it this script will work with Detect Hidden starting at 0 also
+; 3. Buy tinkering around 30-40.
+; 4. Make a small crate with capentry (may have to buy a small amount of carpentry from a skill trainer)
+; 5. Use the key thats inside the crate and lock the crate
+; 5. Craft a dart trap using tinkering and trap crate
+; 6. Grab a crystal ball of knowledge and turn it on. See instructions below on how to get one if you don't already have one.
+; 7. Lock down crate in your house and ensure there are at least 8 tiles of clear space
+;    to the south of it (south on the in-game map, not just straight downward)
+;    If your house isnt big enough lock the box down on the first floor where you can back out into the yard
+; 8. Place your character up against the crate on south side
+; 9. Hit play;
+;
+; HOW TO GET CRYSTAL BALL OF KNOWLEDGE (taken from https://www.uoguide.com/A_Mystic%27s_Journey)
+; Ortlem the Mystic can be found at the Mage Shop in the Royal City, Ter Mur. He gives out A Mystic's Journey quest
+; in which you need to obtain 100 Dragon's Blood and 100 Daemon Bone to get a Crystal Ball of Knowledge as a reward.
+; The Daemon Bones can be found on Void Creatures and on corpses of creatures killed in Doom
+; and Dragon's Blood is found on corpse of dragons after skinning them. Destard is a good place to farm dragon's blood
+;---------------------------------------------------------------------------------------
+
+set %maxskill 1000 ; set this to what you want Detect Hidden to max out at for example 992 is 99.2 in Detect Hidden
+set %trappedbox a
+
+gosub start
+stop
+
+sub start
+    if %maxskill < 1 || %maxskill > 1000
+    {
+     display  %maxskill needs to be a value from 1 to 1000
+     stop
+    }
+    chooseSkill Dete
+    gosub selectBox
+    gosub detectLoop
+    return
+
+sub selectBox
+    set #ltargetid b
+    display Stand south of trapped box then select the trapped box
+	  set #targcurs 1
+    while #targcurs = 1
+    {
+     wait 1
+    }
+    set %trappedbox  #ltargetid
+    wait 2s
+    return
+
+sub detectLoop
+    set %skillmaxed 0
+    while %skillmaxed <= 0
+    {
+      event Macro 13 14
+      target 4s
+      event Macro 22 0
+      set %j 1
+      while  %j < 5
+      {
+        scanjournal %j
+        set %j %j + 1
+        if Easy in #journal
+        {
+           if #CHARDIR = 4
+           {
+              event macro 5 5
+           }
+           else
+           {
+               event macro 5 5
+               wait 20
+               event macro 5 5
+           }
+           break
+        } ; end if EASY
+      }; end while %j < 5
+      if  #skill >= %maxskill
+      {
+         set %skillmaxed 1
+      }
+      wait 12s
+    }; end while %skillmaxed = 0
+    return
+
+
+    
+    
+    
+    

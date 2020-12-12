@@ -1,0 +1,9 @@
+set %fencebarreltype ABG
+repeat
+onhotkey BACK
+{
+ finditem %fencebarreltype G_1
+ set #ltargetid #findid
+ event macro 27
+}
+until #false

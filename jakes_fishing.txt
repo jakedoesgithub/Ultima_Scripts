@@ -1,0 +1,9 @@
+repeat
+{
+ set #lobjectid OIDTAOD
+ event macro 17
+ target 20
+ click 520 337
+ wait 10s
+}
+until #false

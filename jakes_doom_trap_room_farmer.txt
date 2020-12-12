@@ -1,0 +1,55 @@
+set %troomlich WD
+
+repeat
+{
+  event macro 5 0
+  wait 1
+  event macro 5 0
+  wait 1
+  event macro 5 0
+  wait 1
+  event macro 5 0
+  wait 1
+  event macro 5 0
+  wait 1
+  event macro 5 0
+  wait 1
+  event macro 5 4
+  wait 1
+  event macro 5 4
+  wait 1
+  event macro 5 4
+  wait 1
+  event macro 5 4
+  wait 1
+  event macro 5 4
+  wait 1
+  event macro 5 4
+  wait 1
+  finditem %troomlich G_10
+  set #ltargetid #findid
+  set #ltargetkind 1
+  event macro 49 1
+  target 1s
+  event macro 22
+  event macro 27
+  repeat
+  {
+  wait 10
+  }
+  until #enemyhits = N/A
+  set #findindex 2
+  set #ltargetid #findid
+  set #ltargetkind 1
+  event macro 49 1
+  target 1s
+  event macro 22
+  event macro 27
+  repeat
+  {
+  wait 10
+  }
+  until #enemyhits = N/A
+  wait 65s
+}
+until #false

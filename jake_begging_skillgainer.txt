@@ -1,0 +1,41 @@
+;Jakes begging script
+;ghet a bunch of fighters on top of house keep em coralled and use this
+
+set %fightertypes HS_IS
+set %maxskill 1000 ; set this to what you want begging to max out at for example
+
+
+gosub start
+display all done
+stop
+
+sub start
+    if %maxskill < 1 || %maxskill > 1000
+    {
+     display  %maxskill needs to be a value from 1 to 1000
+     stop
+    }
+    chooseSkill Begg
+    gosub beg
+    return
+    
+sub beg
+    repeat
+    {
+    finditem %fightertypes G_3
+    set %n #findcnt
+    for %i 1 %n
+    {
+     set #findindex %i
+     event macro 13 6 ; use skill begging
+     set #ltargetid #findid
+     set #ltargetkind 1
+     target 2s
+     event macro 22
+     wait 13s
+    }
+    wait 1s
+    }
+    until #skill = 1000
+    return
+    

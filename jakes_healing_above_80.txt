@@ -1,0 +1,27 @@
+set %skillmax 1000
+
+set %bandtype ZLF
+
+display target the ghost
+set #targcurs 1
+while #targcurs > 0
+{
+  wait 20
+}
+set %ghost #ltargetid
+gosub main
+display done
+
+sub main
+    chooseskill heal
+    while #skill < %skillmax
+    {
+      finditem %bandtype C_ , #backpackid
+      set #lobjectid #findid
+      event macro 17
+      wait 20
+      set #ltargetid %ghost
+      set #ltargetkind 1
+      event macro 22
+      wait 6s
+    }

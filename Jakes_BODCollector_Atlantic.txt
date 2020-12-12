@@ -1,0 +1,274 @@
+;-----------------------------------------------------------
+; Script Name: BODCollector
+; Author: jake2237
+; Version: 1.0
+; Client Tested with:  7.0.86.2
+; EUO version tested with: 1.6.0.335
+; Shard OSI
+; Revision Date: 8/19/20
+; Public Release: 8/18/20
+; Purpose: Collects my BODS
+;-------------------------------------------------------------
+; USe for characters on atlantic, catskills, legends, great lakes,
+;
+; Instructions:
+; be in back run on right in luna
+;---------------------------------------------------------------------------------------
+;variables
+finditem DYM C_ , #BackPackID  ; replace this with the item number of a bod book
+set #LObjectID #FindID
+set %bodbook #LObjectID
+
+
+    
+set %porchRuneBook EQXSMPD
+set %bookx 0
+set %booky 0
+set %blacksmithid QIDYK
+set %tailorid CWOHI
+set %alchemistid AUVXK
+set %tinkerid EALYK
+set %carpenterid SWMHI
+set %boyerid YFWXK
+set %scribeid LVEYR
+set %cookid GDJFQ
+set %blacksmithholder HGYZLB
+set %tailorholder EZXZLB
+set %tink_alch_scribe_cook_holder BGCGOB
+set %carpenterholder XVEZLB
+set %bowyerholder NREZLB
+set %blacksmithcolor 1102
+set %tailorcolor 1155
+set %alchemistcolor 2505
+set %tinkercolor 1109
+set %carpentercolor 1512
+set %boyercolor 1421
+set %scribecolor 2598
+set %cookcolor 1169
+set %bodtype EYM
+
+
+set #lpc 200
+gosub main
+stop
+
+sub main
+    gosub walk_to_start
+    gosub luna_bod_collect
+    gosub go_back
+    gosub bods_to_book
+    return
+
+sub bods_to_book
+    finditem %bodtype C_ , #backpackid
+    for %i 1 #findcnt
+    {
+     finditem %bodtype C_ , #backpackid
+     gosub dragndrop #findid 1 %bodbook
+     wait 30
+    }
+    return
+
+;got this wokring
+sub scannpcs
+    finditem  _HS_IS_AV_XU_ G_20
+    for #findindex 1 #findcnt
+    {
+      event Property #Findid
+      set %p #property
+      str lower %p
+      set %p #strres
+      wait 1s
+      if blacksmith in %p
+      {
+         set %blacksmithid #Findid
+         ;display got black
+      }
+      if weaver in %p
+      {
+         set %tailorid #Findid
+         ;display got taylor
+      }
+      if bowyer in %p
+      {
+         set %bowyerid #Findid
+         ;display got boyer %boyerholder
+      }
+      if carpenter in %p
+      {
+         set %carpenterid #Findid
+         ;display got carpenter
+      }
+      if alchemist in %p
+      {
+         set %alchemistid #Findid
+         ;display got carpenter
+      }
+    }
+    return
+
+
+
+; this look done
+;%1 should be type of material to search (aka the name of the book)
+sub findbook
+  set %param %1
+  finditem DYM C_ , %bag
+  while #FINDINDEX < #FINDCNT + 1
+  {
+   gosub s7GetProperty #FINDID
+   set %bookprop #property
+   str lower %bookprop
+   set %bookprop #strres
+   if %param in %bookprop
+   {
+    set %bookid #FINDID
+    break
+   }
+   else
+   {
+    set #FINDINDEX #FINDINDEX + 1
+   }
+  }
+  return
+
+
+;walks upstairs in luna an logs out
+sub go_back
+    event pathfind 1008 518 -50
+    wait 2s
+    event pathfind 1007 513 -50
+    wait 2s
+    event pathfind 1007 520 -30
+    wait 4s
+    event pathfind 1002 521 -30
+    wait 2s
+    event macro 5 5 ; turn south to door
+    wait 1s
+    event macro 12 0 ; open door
+    wait 20
+    event pathfind 1000 526 -30
+    wait 2s
+    return
+    
+
+
+
+;works perfect
+sub walk_to_start
+    event pathfind 1000 526 -30
+    wait 1s
+    event pathfind 1002 523 -30
+    wait 2s
+    event macro 12 0 ; open door
+    wait 50
+    event pathfind 1002 521 -30
+    wait 1s
+    event pathfind 1007 518 -30
+    wait 2s
+    event pathfind 1008 513 -50
+    wait 2s
+    event pathfind 1001 520 -50
+    wait 4s
+    gosub scannpcs
+    wait 20
+    event pathfind 991 520 -50
+    wait 3s
+    event pathfind 982 519 -50
+    wait 4s
+    gosub scannpcs
+    return
+
+
+;bod collect sub works perfect
+sub luna_bod_collect
+    gosub collect_bods %blacksmithid
+    wait 2s
+    gosub collect_bods %tailorid
+    wait 2s
+    event PathFind 987 520 -50 2 10
+    wait 3s
+    event PathFind 1001 520 -50 1 10
+    wait 3s
+    gosub collect_bods %alchemistid
+    wait 2s
+    gosub collect_bods %bowyerid
+    wait 2s
+    gosub collect_bods %carpenterid
+    wait 2s
+    return
+
+;parameters %1 is vendor id to get bods from
+;works perfectly
+sub collect_bods
+    set %vendid %1
+    set %i 0
+    while %i < 3
+    {
+      Exevent Popup %vendid 0 0
+      wait 1s
+      SET %xclick #CONTPOSX + 26
+      set %yclick #CONTPOSY + 41
+      click %xclick %yclick dmc
+      wait 1s
+      set %yclick #CONTPOSY + #CONTSIZEY - 30
+      set %xclick #CONTPOSX + 80
+      set %xclickmax #CONTPOSX + #CONTSIZEX / 4
+      while %xclick < %xclickmax
+      {
+       click %xclick %yclick dmc
+       wait 1s
+       set %xclick %xclick + 20
+      }
+      set %i %i + 1
+    }
+    return
+
+;----
+;* @name s7GetProperty
+;* @author snicker7
+;* @ver 2.1 20080309
+;* @purpose	 failsafe method for obtaining property values.
+;* @params 	 %1	ID of item to get property of.
+;* @dependencies N/A
+;* @returns 	 N/A
+;* @notes 	 N/A
+;* @example: gosub s7GetProperty #findid
+;* @status done
+sub s7GetProperty
+	set !_7gpt #systime
+	event property %1
+	for !_7gp 1 1
+	{
+		if !_7gpt + 1500 < #systime
+			return #false
+		if #property = $ || no , #spc , significant in #property || no , #spc , data in #property || ( %0 > 1 && %0 = 2 && #property = %2 )
+			set !_7gp 0
+		if no , #spc , data in #property || ( %0 > 1 && %0 = 2 && #property = %2 )
+			event property %1
+	}
+return #true
+
+;-----------------------------------------------------------------------------------------------
+;Drag N Drop Sub
+';Use this when you need to drag and dro an item somewhere on a container, stack, whatever.
+;param %1  - itemid to drag
+;param %2 -  amouunt of item to drag (just enter 1 if its nota stackable item)
+; param %3 - itemid, containerid , or whatever you want to drop item on.
+; optional params %4 and %5 are the x and y coordinates to drop the item at in the container
+;---------------------------------------------------------------------------------------------
+sub dragNdrop
+    if %0 < 2 || %0 > 5
+    {
+      display Please fix parameters for dragNdrop and try again
+    }
+
+    Exevent Drag %1 %2
+    wait 10
+    if %0 > 3
+       Exevent Dropc %3 %4 %5
+    else
+        Exevent Dropc %3
+    wait 10
+    return
+

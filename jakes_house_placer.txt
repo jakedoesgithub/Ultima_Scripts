@@ -1,0 +1,14 @@
+;keep placeer
+
+set %tooltype CWH
+set %tool XZGRFVD
+set %fencebarreltype ABG
+gosub main
+
+sub main
+    key ESC
+    set #lobjectid %tool
+    
+    set #ltargetkind 2
+    
+

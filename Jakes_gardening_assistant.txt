@@ -1,0 +1,93 @@
+;--------------------------
+;Jakes Gardening Assistant
+; Plants my plants anbd picks them too
+;--------------------------
+
+;variables needed
+set %clippertype JFF
+;plant id values and plant gump id
+set %orange_petal_plant_type YVE_BXE
+set %orange_petal_gump AYQ
+
+; plant gump ositions relative to gumpx and gumpy
+set %mainx 80  ; x to open reproduction page
+set %mainy 74   ; y to open reproduction page
+set %resourcex 147 ; x to collect resource
+set %resourcey 170 ; y to collect resource
+set %seedx 223 ; x to collect seed
+set %seedy 171 ; y to collect seed
+set %decox 221 ; x to collect seed
+set %decoy 74 ; y to collect seed
+set %decoyesx 179 ; x to collect seed
+set %decoyesy 148 ; y to collect seed
+set %closex 151 ; x to close gump
+set %closey 80 ;y to close gump
+;-------------------------------------------------
+
+gosub main
+display "All Done"
+stop
+
+sub main
+    ; openbackpack in certain spot
+    event macro 9 7
+    wait 20
+    set #nextCPosX 1200
+    set #nextCPosY 390
+    event macro 8 7
+    wait 20
+    ; find clipper id
+    finditem %clippertype C_ , #backpackid
+    set %clipperid #findid
+    ; start loop to plant resources
+    finditem %orange_petal_plant_type G_3
+    set %num #findcnt
+    for %i 1 %num
+    {
+      finditem %orange_petal_plant_type G_3
+      set #lobjectid #findid
+      set #nextCPosX 50
+      set #nextCPosY 50
+      event macro 17
+      wait 20
+      ;go to resources menu
+      set %clickx #contposx + %mainx
+      set %clicky #contposy + %mainy
+      click %clickx %clicky dmc
+      wait 20
+      ;begin colecting resources
+      set %clickx #contposx + %resourcex
+      set %clicky #contposy + %resourcey
+      for %j 1 8
+      {
+        click %clickx %clicky dmc
+        wait 20
+      }
+      ;begin collectiing seeds
+      set %clickx #contposx + %seedx
+      set %clicky #contposy + %seedy
+      for %j 1 8
+      {
+        click %clickx %clicky dmc
+        wait 20
+      }
+      ;turn plant to deco mode
+      set %clickx #contposx + %decox
+      set %clicky #contposy + %decoy
+      click %clickx %clicky dmc
+      wait 20
+      set %clickx #contposx + %decoyesx
+      set %clicky #contposy + %decoyesy
+      click %clickx %clicky dmc
+      wait 20
+      ;cut up plant in pack using clippers
+      finditem %orange_petal_plant_type C_ , #backpackid
+      set %plant #findid
+      set #lobjectid %clipperid
+      event macro 17
+      wait 20
+      set #ltargetid %plant
+      event macro 22
+      wait 20
+    }
+

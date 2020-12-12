@@ -1,0 +1,25 @@
+; note bribing normal/10 items seems to be very cheap. Look for items which, if made exceptional,
+; grant you the required points to gain a certain reward.
+
+{rewards}
+[blacksmith]
+^powder of fortification^
+; exc/iron/20 -> exc/dull/20 for powder of fortification
+; exc/dull/20 for powder of fortitfication
+^shadow hammer^
+; exc/copper/10 -> exc/bronze/10 for shadow iron hammers
+; exc/copper/15 -> exc/bronze/15 for shadow iron hammers
+
+
+
+[Tailor]
+^Clothing bless deeds^
+;4-part bods
+;exc/horned/20 and up
+ -Sandals, Shoes, Boots, Thigh Boots
+;5-part bods 
+; exc/cloth/20 | exc/normleather/20 and up
+	-Feathered Hat, Surcoat, Fancy Shirt, Short Pants, Thigh Boots only cloth
+ and the leather ones
+^Cloth bods not used for 
+

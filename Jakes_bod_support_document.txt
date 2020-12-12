@@ -1,0 +1,85 @@
+; note bribing normal/10 items seems to be very cheap. Look for items which, if made exceptional,
+; grant you the required points to gain a certain reward.
+
+
+{general help}
+; Keep chainmail and platemail of agapite , verite, valorite for bods
+; dont worry about ringmail too many peices for less effect n dont want to collect every damn thing 
+
+[blacksmith]
+^powder of fortification^
+;normal/gold/20and above 
+;exc/iron/20 -> exc/dull/20
+;exc/dull/20 
+
+^shadow hammer^
+;exc/copper/10 -> exc/bronze/10 
+;exc/copper/15 -> exc/bronze/15 
+;exc/bronze/10 
+;exc/bronze/15 
+;exc/gold/10
+;exc/gold/15
+
+^copper hammer^
+; exc/bronze/20 -> exc/gold/20 -> copper hammer
+; exc/gold/20 for copper hammer
+;
+^bronze hammer^
+; enhance exc/ag/10 and exc/ag/15 when u get em
+;exc/agapite/20 for bronze hammer
+
+
+
+[tailor]
+
+{4-part LBODS}
+Bandana, Shirt, Skirt, Thigh Boots
+Skullcap, Doublet, Kilt, Shoes
+Jester Hat, Jester Suit, Cloak, Shoes
+Straw Hat, Tunic, Long Pants, Boots
+Wizards Hat, Body Sash, Robe, Boots
+Floppy Hat, Full Apron, Plain Dress, Sandals
+Bonnet, Half Apron, Fancy Dress, Sandals
+Tricorn Hat, Cap, Wide-brim Hat, Tall Straw Hat
+Sandals, Shoes, Boots, Thigh Boots
+{5-part LBODS}
+Feathered Hat, Surcoat, Fancy Shirt, Short Pants, Thigh Boots
+Studded Tunic, Studded Gorget, Studded Gloves, Studded Sleeves, Studded Leggings
+Bone Armor, Bone Arms, Bone Legs, Bone Gloves, Bone Helm
+{6-part LBODS}
+-Female Leather Armor, Leather Shorts, Leather Skirt, Leather Bustier, Studded Bustier, Studded Armor
+-Leather Tunic, Leather Gorget, Leather Cap, Leather Gloves, Leather Sleeves, Leather Leggings
+
+^^^spined runic kit^^^ - 350 pts
+-|4 part LBOD|-
+norm/cloth/20 
+norm/leather/20
+
+exc/cloth/10,15,20
+exc/leather/10,15,20
+
+
+^clothing bless deed^ - 550 pts
+-|5 part LBOD|-
+exc/cloth/20
+exc/leather/20
+
+
+^horned runic kit^ - 600 pts
+-|4 part LBOD|-
+exc/barbed/20
+
+-|5 part LBOD|-
+exc/spined/20
+
+
+^barbed runic kit^ - 700 pts
+-|5 part LBOD|-
+exc/barbed/20
+
+-|6 part LBOD|-
+exc/spined/20
+
+
+
+[tailor]

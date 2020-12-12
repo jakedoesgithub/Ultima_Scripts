@@ -1,0 +1,11 @@
+
+set #targcurs 1
+target 2s
+while #targcurs = 1
+{
+ wait 20
+}
+finditem #ltargetid C_ , #backpackid
+display #findtype
+stop
+

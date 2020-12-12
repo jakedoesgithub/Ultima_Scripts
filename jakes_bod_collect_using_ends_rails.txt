@@ -1,0 +1,48 @@
+  ;gosub ERT_write #CURPATH , bod_collection_rails.txt  ;write to the file in the euox.exe dir
+  gosub ERT_runRail #CURPATH , bod_collection_rails.txt luna1_to_luna2
+  gosub ERT_runRail #CURPATH , bod_collection_rails.txt luna2_to_gate
+  ;gate to jhelom
+  finditem OTF G_3
+  set #lobjectid #findid
+  event macro 17
+  wait 10
+  set %clickx #CONTPOSX + 17
+  set %clicky #CONTPOSY + 41
+  click %clickx %clicky dmc
+  wait 10
+  set %clickx #CONTPOSX + 209
+  set %clicky #CONTPOSY + 94
+  click %clickx %clicky dmc
+  wait 10
+  set %clickx #CONTPOSX + 23
+  set %clicky #CONTPOSY + 218
+  click %clickx %clicky dmc
+  wait 2s
+  ;run rails to scribe
+  gosub ERT_runRail #CURPATH , bod_collection_rails_fix.txt testrail
+  ;collect bods from scribe
+  ;run rails to cook
+  gosub ERT_runRail #CURPATH , bod_collection_rails.txt scribe_to_cook
+  ;collect bods from cook
+  ;run rails back to mongate
+  gosub ERT_runRail #CURPATH , bod_collection_rails.txt cook_to_jhelom_gate
+  ;use moongate to get back to luna
+  finditem OTF G_3
+  set #lobjectid #findid
+  event macro 17
+  wait 10
+  set %clickx #CONTPOSX + 17
+  set %clicky #CONTPOSY + 116
+  click %clickx %clicky dmc
+  wait 10
+  set %clickx #CONTPOSX + 211
+  set %clicky #CONTPOSY + 44
+  click %clickx %clicky dmc
+  wait 10
+  set %clickx #CONTPOSX + 23
+  set %clicky #CONTPOSY + 218
+  click %clickx %clicky dmc
+  wait 2s
+  ; run rails to scribe
+  gosub ERT_runRail #CURPATH , bod_collection_rails.txt luna_gate_to_beginning
+  halt

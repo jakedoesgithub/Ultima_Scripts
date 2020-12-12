@@ -1,0 +1,381 @@
+;Jakes Reagent and Bottle Buyer
+; Buys all regs and bottles from npc and puts them in beetle
+; Set hk to the hotkey you want to use.
+;Directions: First set the variables below how you like them, make sure your packy's id is saved for variable %bug
+; and save the beetles/packy's container id under bugcnt
+; Pressing the hotkey will turn the cursor into a target cursor. Target the vendor you want to buy from with it.
+;It will automatically buy as much as possible of every item that has an item type listed in the %itemstobuy variable below.
+
+
+set %hk F1
+set %hk2 F2
+set %bug UILOV     ;this is the id of your packy or beetle
+set %bugcnt CLCZPND  ; this is the container id for the bug
+set %itemstobuy JUF_KUF_SZF_RZF_JZF_WZF_KZF_MZF_UZF_YZF_IUF_DUF_TZF_NZF_GUF ;this is every type of reagent (mage/necro/mystic) on the mysticism vendors
+;set %itemstobuy WUF ;this is just bottles
+
+;do not edit beyond this point unless script broke
+set %downarrowx 394  ; the x position of the shops down arrow
+set %downarrowy 203 ; the y position of the shops down arrow
+set %topitemx 270   ; the x position to click to buy the top item
+set %topitemy 96    ; the y position to click to buy the top item
+set %acceptx 366  ; the x position to click to accept bill of sale
+set %accepty 428 ; the y position to click to accept bill of sale
+
+set %alchemycontainer QIYJZND
+
+set #lpc 1000
+repeat
+{
+      onhotkey %hk
+               gosub combine
+               
+      onhotkey %hk2
+               gosub main
+}
+until #false
+
+sub main
+    ; this is where it buys the items from the vendor
+    ;set #targcurs 1
+    ;while #targcurs = 1
+    ;      wait 10
+    ;set %vendor #ltargetid
+    ;exevent popup %vendor
+    ;wait 20
+    ;click 22 39 dmc
+    msg vendor buy $
+    set #CONTPOSX 320
+    set #CONTPOSY 219
+    wait 50
+    getShopInfo
+    set %stop #shopcnt
+    for %x 1 %stop  ; this loops thru all vendor items and adds max of items in %itemstobuy list
+    {
+      getShopInfo
+      if #shopitemtype in %itemstobuy
+      click %topitemx %topitemy dmc d
+      wait 5
+      setshopitem #shopitemid #shopitemmax
+      click %downarrowx %downarrowy dmc
+    }
+    click %acceptx %accepty dmc  ; accepts the purchase
+    
+    ; this is where it takes items from backpack and off ground and puts them in beetle/packy
+    gosub dismount
+    wait 20
+    finditem %itemstobuy C_ , #backpackid  ; get item from backpack put in bug
+    set %stop #findcnt
+    
+    for %x 1 %stop
+    {
+     set #findindex %x
+     gosub dragndrop #findid #findstack %bug
+    }
+    finditem %itemstobuy G_2   ; get items from ground put in bug
+    set %stop #findcnt
+    for %x 1 %stop
+    {
+     set #findindex %x
+     gosub dragndrop #findid #findstack %bug
+    }
+    wait 20
+    gosub mount
+    
+    return
+
+sub dropoff
+    gosub runebookrecall 3
+    wait 2s
+    event macro 5 1
+    wait 5
+    event macro 5 1
+    wait 5
+    event macro 5 1
+    wait 5
+    event macro 5 1
+    wait 5
+    event macro 5 1
+    wait 5
+    wait 2s
+    event macro 5 2
+    wait 5
+    event macro 5 2
+    wait 5
+    event macro 5 2
+    wait 5
+    event macro 5 2
+    wait 5
+    event macro 5 2
+    wait 5
+    event macro 5 1
+    wait 5
+    event macro 5 1
+    wait 5
+    event macro 5 1
+    wait 5
+    event macro 5 1
+    wait 5
+    event macro 5 1
+    wait 5
+    event macro 5 1
+    wait 5
+    event macro 5 1
+    wait 5
+    event macro 5 1
+    wait 5
+    wait 1s
+    gosub dismount
+    set #lobjectid %bugcnt
+    event macro 17
+    wait 20
+    finditem %itemstobuy C_ , %bugcnt
+    set %stop #findcnt
+    for %y 1 %stop
+    {
+        set #findindex %y
+        gosub dragndrop #findid #findstack %alchemycontainer
+    }
+    wait 2s
+    gosub mount
+    return
+    
+sub combine
+    set #ltargetkind 1
+    ;open backpack
+    event macro 8 7
+    wait 20
+    set #contposx 843
+    set #contposy 363
+    wait 10
+
+
+    ;open status
+    event macro 8 2
+    wait 20
+    set #contposx 843
+    set #contposy 595
+    wait 20
+
+    ;set runebook
+    finditem ZBN C_ , #backpackid
+    set %runebook_id #findid
+    wait 2s
+    
+    
+    repeat
+    {
+      gosub runebookrecall 6
+      wait 2s
+      find
+      event pathfind 782 3481 -20
+      wait 3s
+      gosub hugvendor OCB G_4
+      gosub main
+      wait 1s
+      gosub dropoff
+      wait 1s
+
+      gosub runebookrecall 6
+      wait 1s
+      event pathfind 777 3485 -20
+      wait 3s
+      event pathfind 773 3487 -20
+      wait 3s
+      gosub hugvendor NCB G_4
+      wait 3s
+      gosub main
+      wait 1s
+      gosub dropoff
+      wait 1s
+
+      gosub runebookrecall 6
+      wait 1s
+      event pathfind 777 3485 -20
+      wait 3s
+      event pathfind 775 3494 -20
+      wait 3s
+      gosub hugvendor OCB G_4
+      wait 3s
+      gosub main
+      wait 1s
+      gosub dropoff
+      wait 1s
+
+      gosub runebookrecall 6
+      wait 1s
+      event pathfind 778 3476 -20
+      wait 3s
+      event pathfind 771 3474 -20
+      wait 3s
+      gosub hugvendor NCB G_2
+      wait 3s
+      gosub main
+      wait 1s
+      gosub dropoff
+      wait 1s
+
+      gosub runebookrecall 6
+      wait 1s
+      event pathfind 778 3476 -20
+      wait 3s
+      event pathfind 770 3479 -20
+      wait 3s
+      gosub hugvendor NCB G_2
+      wait 3s
+      gosub main
+      wait 1s
+      gosub dropoff
+      wait 300s
+      event macro 8 5
+      set #contposx 0
+      set #contposy 0
+      click 10 10 r dmc
+      wait 300s
+      event macro 8 5
+      set #contposx 0
+      set #contposy 0
+      click 10 10 r dmc
+      wait 300s
+      event macro 8 5
+      set #contposx 0
+      set #contposy 0
+      click 10 10 r dmc
+      wait 300s
+      event macro 8 5
+      set #contposx 0
+      set #contposy 0
+      click 10 10 r dmc
+      wait 5s
+    }
+    until #false
+    return
+
+;%1 object type
+;%2 search radius
+sub hugvendor
+    finditem %1 %2
+    set #ltargetkind 1
+    set #ltargetid #findid
+    set %xx #ltargetx
+    set %yy #ltargety
+    set %zz #ltargetz
+    event pathfind %xx %yy %zz
+    wait 4s
+    return
+    
+sub mount
+    set #ltargetkind 1
+    set #lobjectid %bug
+    event macro 17
+    wait 20
+    return
+
+sub dismount
+    set #ltargetkind 1
+    set #lobjectid #charid
+    event macro 17
+    wait 20
+    return
+    
+;-----------------------------------------------------------------------------------------------
+;Drag N Drop Sub
+';Use this when you need to drag and dro an item somewhere on a container, stack, whatever.
+;param %1  - itemid to drag
+;param %2 -  amouunt of item to drag (just enter 1 if its nota stackable item)
+; param %3 - itemid, containerid , or whatever you want to drop item on.
+; optional params %4 and %5 are the x and y coordinates to drop the item at in the container
+;---------------------------------------------------------------------------------------------
+sub dragNdrop
+    set *location dragndrop
+    if %0 < 2 || %0 > 5
+    {
+      display Please fix parameters for dragNdrop and try again
+    }
+
+    Exevent Drag %1 %2
+    wait 10
+    if %0 > 3
+       Exevent Dropc %3 %4 %5
+    else
+        Exevent Dropc %3
+    wait 10
+    return
+    
+;---------------------------------------------------------------------------------------------
+;Runebook Recall
+';Use this when you need to recall to a certain rune in a runebook.
+;param %1  - the number of the rune in the book
+;this works for runebook, not runic atlases
+;---------------------------------------------------------------------------------------------
+sub runebookrecall
+    set *location runebookrecall
+    ;display in sub runebook recall
+    namespace push
+    namespace local _runebookrecall
+    ; finding x y variables for navigational clicks in rubnebook
+    set !page %1 / 2
+
+    if %1 % 2 = 0
+    {
+      set !recallx 299
+      set !recally 144
+    }
+    else
+    {
+      set !recallx 139
+      set !recally 143
+      set !page !page + 1
+    }
+
+    ;set !pagex 140
+    set !pagey 196
+    set !pagex1 139
+    set !pagex2 172
+    set !pagex3 209
+    set !pagex4 246
+    set !pagex5 308
+    set !pagex6 344
+    set !pagex7 380
+    set !pagex8 414
+
+    set !pagex !pagex . !page
+
+    ;save x and y location to compare and see if recall occured
+    set !posx #charposx
+    set !posy #charposy
+
+
+    while #charposx = !posx && #charposy = !posy
+    {
+      ;open runebook
+      set #lobjectid %runebook_id
+      event macro 17
+      wait 20
+
+      ; click to open to page number
+      set !clickx #CONTPOSX + !pagex
+      set !clicky #CONTPOSY + !pagey
+      click !clickx !clicky dmc
+      wait 20
+
+      ; click the recall button on page
+      set !clickx #CONTPOSX + !recallx
+      set !clicky #CONTPOSY + !recally
+      click !clickx !clicky dmc
+      wait 2s
+      if art_too_encumbered in #sysmsg
+      {
+       gosub dismount
+       wait 20
+       gosub minismelt
+       wait 30
+       gosub mount
+       wait 20
+      }
+      wait 2s
+    }
+    namespace clear
+    namespace pop
+    return
+

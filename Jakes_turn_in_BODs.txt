@@ -1,0 +1,184 @@
+;Jakes TurnInBods
+;Purpose - a callable or independently runnable scrpt that turns in BOD's and get new ones.
+; Can take filled BODS from one bulk order book and place them inside another bulk order book.
+
+namespace push
+namespace local _turninbods
+
+if %0 = 0 || %0 = N/A
+   gosub main
+
+display All Done
+stop
+
+sub main
+    ; Select vendor
+    display Select vendor to give bods to
+    set #targcurs 1
+    targloop:
+             wait 1s
+             if #targcurs > 0
+                goto targloop
+    set %vendorid  #ltargetid
+    
+    ; select filled BOD book
+    display Select filled bod book
+    set #targcurs 1
+    targloop2:
+             wait 1s
+             if #targcurs > 0
+                goto targloop2
+    set %filledbodbookid #ltargetid
+    
+    ;select book where new bods go
+    display Select book to put new bods
+    set #targcurs 1
+    targloop3:
+             wait 1s
+             if #targcurs > 0
+                goto targloop3
+    set %newbodbookid #ltargetid
+    set %numbods 0
+    gosub getNumBODs %filledbodbookid %numbods
+    for %n 1 %numBods
+    {
+      gosub removebodfrombook
+      gosub turnInBOD %bodid %vendorid
+      gosub collectbods %vendorid
+      finditem EYM C_ , #backpackid
+      set %newbodid #Findid
+      gosub dragNdrop %newbodid %newbodbookid
+      wait 10
+      gosub closegump
+      wait 10
+    }
+    ;end of script
+    return
+    
+    
+sub removebodfrombook
+    set #lobjectid %filledbodbookid
+    event macro 17
+    wait 20
+    set !x #CONTPOSX + 42
+    set !y #CONTPOSY + 104
+    click !x !y dmc
+    wait 20
+    set !x #CONTPOSX + 35
+    set !y #CONTPOSY + 80
+    click !x !y r dmc
+    wait 20
+    finditem EYM C_ , #backpackid
+    set %bodid #findid
+    return
+
+
+sub collectbods
+    set %vendid %1
+    Exevent Popup %vendid 0 0
+    wait 1s
+    set %xclick #CONTPOSX + 26
+    set %yclick #CONTPOSY + 41
+    click %xclick %yclick dmc
+    wait 1s
+    set %yclick #CONTPOSY + #CONTSIZEY - 30
+    set %xclick #CONTPOSX + 80
+    set %xclickmax #CONTPOSX + #CONTSIZEX / 4
+    while %xclick < %xclickmax
+    {
+     click %xclick %yclick dmc
+     wait 1s
+     set %xclick %xclick + 20
+    }
+    return
+
+; param 1 is book id variable
+; param 2 is variable to hold number of bods
+sub getNumBODs
+    if %0 <> 2
+    {
+     Display need 2 parameters aftercalling this _sub
+    }
+    namespace push
+    namespace local _numbodsvars
+    event property %1
+    set %bookdata #property
+    str lower %bookdata
+    set %bookdata #strres
+        ;display bookdata %bookdata
+    str pos %bookdata : 2
+    set !start #strres + 1
+    str pos %bookdata book 3
+    set !end #strres - 1
+    set !num  !end - !start
+    str mid %bookdata !start !num
+    set %numbods #strres
+        ;display numbods %numbods
+    str len %numbods
+    set !num #strres - 2
+    str mid %numbods !num
+    str %2 #strres
+        ;display numbods %numbods
+    namespace clear
+    namespace pop
+    return
+    
+;-----------------------------------------------------------------------------------------------
+;Drag N Drop Sub
+';Use this when you need to drag and dro an item somewhere on a container, stack, whatever.
+;param %1  - itemid to drag
+;param %2 -  amouunt of item to drag (just enter 1 if its nota stackable item)
+; param %3 - itemid, containerid , or whatever you want to drop item on.
+; optional params %4 and %5 are the x and y coordinates to drop the item at in the container
+;---------------------------------------------------------------------------------------------
+sub dragNdrop
+    if %0 < 2 || %0 > 5
+    {
+      display Please fix parameters for dragNdrop and try again
+    }
+    
+    Exevent Drag %1 @
+    wait 10
+    if %0 > 3
+       Exevent Dropc %2 %3 %4
+    else
+        Exevent Dropc %2
+    wait 10
+    return
+
+
+;-----------------------------------------------------------------------------------------------
+;Give BOD To Vendor
+';Use this when you need to drag and dro an item somewhere on a container, stack, whatever.
+;param %1  - bod id to turn in
+;param %2 -  vendor id to give bod to
+; future changes to parse the bod and refrence file for possible of rewards and to check
+; which rewards you are after to select the reward obtained
+;currently just works with autobank for points
+;---------------------------------------------------------------------------------------------
+sub turnInBOD
+    if %0 < 2 || %0 > 5
+    {
+      display Please fix parameters for dragNdrop and try again
+    }
+
+    Exevent Drag %1 @
+    wait 10
+    if %0 > 3
+       Exevent Dropc %2 %3 %4
+    else
+        Exevent Dropc %2
+    wait 10
+    gosub closegump
+    wait 10
+    return
+    
+    
+;Close Gump
+; closes a gump by right clicking on it
+sub closegump
+    set %cx #contposx + 10
+    set %cy #contposy + 10
+    click %cx %cy f r dmc
+    wait 10
+    return

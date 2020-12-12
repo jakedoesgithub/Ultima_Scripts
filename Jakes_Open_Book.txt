@@ -1,0 +1,18 @@
+; Jakes Open Book
+; Author: jake
+;Opens a book every 60 seconds to keep character logged in. 
+; Future improvements - A menu that allows user to choose what book is opened when script starts
+
+
+gosub main
+stop
+
+sub main
+	while #true
+	{
+	 ;event macro 8 12 ; necro spellbook
+	 event macro 8 5 ; magery spellbook
+	 wait 60s
+	}
+	return
+

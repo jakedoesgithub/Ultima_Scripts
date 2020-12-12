@@ -1,0 +1,85 @@
+;Display variables
+; parameters %1 is the hotkey
+; the rest of parameters are variables you want
+; call this from another script or use it as a standalone script by changing #standalone variable
+
+
+
+
+if %0 = 0 || %0 = N/A
+{
+    gosub standalone F2 cursorx cursory
+}
+else
+{
+set %size %0
+if %size < 2
+{
+   display Need to include parameters
+   return
+}
+set %hotkey %1
+set %i 2
+while %i <= %size
+{
+ set %param , %i  % . %i
+ set %i %i + 1
+}
+repeat
+{
+  onhotkey %hotkey
+  {
+      set %i 2
+      set %out #spc
+      while %i <= %size
+      {
+       set %var , %i # . %param . %i
+       set %out %out , #spc , %param . %i , : , #spc , %var . %i , #spc
+       set %i %i + 1
+      }
+      display %out
+      exit
+  }
+}
+until #false
+stop
+}
+
+sub standalone
+    set %size %0
+    if %size < 2
+    {
+       display Need to include parameters
+       return
+    }
+    set %hotkey %1
+    set %i 2
+    while %i <= %size
+    {
+     set %param , %i  % . %i
+     set %i %i + 1
+    }
+    repeat
+    {
+      onhotkey %hotkey
+      {
+          set %i 2
+          set %out #spc
+          while %i <= %size
+          {
+           set %var , %i # . %param . %i
+           set %out %out , #spc , %param . %i , : , #spc , %var . %i , #spc
+           set %i %i + 1
+          }
+          set %xchange %var2 - #CONTPOSX
+          set %ychange %var3 - #CONTPOSY
+          display %out $
+                  + xchange: %xchange $
+                  + ychange: %ychange
+      }
+    }
+    until #false
+    stop
+
+
+

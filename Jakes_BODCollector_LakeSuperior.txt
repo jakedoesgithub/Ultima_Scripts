@@ -1,0 +1,769 @@
+;-----------------------------------------------------------
+; Script Name: BODCollector
+; Author: jake2237
+; Version: 1.0
+; Client Tested with:  7.0.86.2
+; EUO version tested with: 1.6.0.335
+; Shard OSI
+; Revision Date: 8/19/20
+; Public Release: 8/18/20
+; Purpose: Collects my BODS
+;-------------------------------------------------------------
+; This script is free to steal or alter any way you see fit
+;
+; Instructions:
+; have runebook set default my house
+;---------------------------------------------------------------------------------------
+;variables
+finditem ZBN C_ , #BackPackID
+set #LObjectID #FindID
+set %homeRuneBook #LObjectID
+
+    
+set %porchRuneBook EQXSMPD
+set %bookx 0
+set %booky 0
+set %blacksmithid QIDYK
+set %tailorid CWOHI
+set %alchemistid AUVXK
+set %tinkerid EALYK
+set %carpenterid SWMHI
+set %boyerid YFWXK
+set %scribeid LVEYR
+set %cookid GDJFQ
+set %blacksmithholder HGYZLB
+set %tailorholder EZXZLB
+set %tink_alch_scribe_cook_holder BGCGOB
+set %carpenterholder XVEZLB
+set %boyerholder NREZLB
+set %cookholder yyyyyy
+set %scriberholder yyyyy
+set %alchemyholder yyyyy
+set %tinkerholder yyyyy
+set %blacksmithcolor 1102
+set %tailorcolor 1155
+set %alchemistcolor 2505
+set %tinkercolor 1109
+set %carpentercolor 1512
+set %boyercolor 1421
+set %scribecolor 2598
+set %cookcolor 1169
+
+
+
+
+
+gosub main
+display done
+stop
+
+sub main
+    gosub go_home
+    gosub house_to_luna
+    gosub luna_bod_collect
+    gosub go_home
+    gosub recall_to_jhelom
+    gosub bod_collect_jhelom
+    gosub go_home
+    gosub walk_inside
+    gosub get_vendor_ids
+    gosub save_bods
+    return
+
+sub walk_inside
+;walks onto porch teleporter and ends up on second floor
+    if #CHARDIR <> 0
+       event Macro 5 1
+    set %t 0
+    myloop:
+     event Macro 5 1
+     wait 1s
+     set %t %t + 1
+     if %t < 4
+        goto myloop
+;turns right and walks into middle of bod vendors
+    set %t 0
+    myloop2:
+     event Macro 5 3
+     wait 1s
+     set %t %t + 1
+     if %t < 4
+        goto myloop2
+
+
+
+;got this wokring
+sub get_vendor_ids
+    set #lpc 10
+    finditem  _HS_IS_AV_XU_ G_2
+    for #findindex 1 #findcnt
+    {
+      event Property #Findid
+      set %p #property
+      str lower %p
+      set %p #strres
+      wait 1s
+      if blacksmith in %p
+      {
+         set %blacksmithholder #Findid
+         ;display got black
+      }
+      if tailor in %p
+      {
+         set %tailorholder #Findid
+         ;display got taylor
+      }
+      if boyer in %p
+      {
+         set %boyerholder #Findid
+         ;display got boyer %boyerholder
+      }
+      if carpenter in %p
+      {
+         set %carpenterholder #Findid
+         ;display got carpenter
+      }
+      if scribe in %p
+      {
+         set %scribeholder #Findid
+         ;display got other
+      }
+      if tinker in %p
+      {
+         set %tinkerholder #Findid
+         ;display got other
+      }
+      if alchemy in %p
+      {
+         set %alchemyholder #Findid
+         ;display got other
+      }
+      if cook in %p
+      {
+         set %cookholder #Findid
+         ;display got other
+      }
+    }
+    return
+
+sub save_bods
+      ;display  save bods
+      ;set #LOBJECTID #BACKPACKID
+      ;event macro 17
+      finditem EYM C_ , #BACKPACKID
+      set %totalbods #FINDCNT
+      set %bodindex #FINDINDEX
+      for %bodindex 1 %totalbods
+      {
+         if #CHARPOSX <> 753 || #CHARPOSY <> 1363
+         {
+          ;pathfinds to a location where it can reach every vendor holding my bod books
+          event PathFind 753 1363 -63
+          wait 4s
+         }
+         ;display index %bodindex total bods %totalbods
+        finditem EYM C_ , #BACKPACKID
+        wait 20
+        set %bodid #FINDID
+        gosub s7GetProperty %bodid
+        ;display #property
+        str lower #property
+        set %boddata #strres
+        ;display %boddata
+        set %bookid 0
+        set %bag 0
+        set %bookx 0
+        set %booky 0
+        set %bagx  0
+        set %bagy 0
+        if #findcol = %blacksmithcolor
+        {
+           ; opens vendor menu
+           set #LOBJECTID %blacksmithholder
+           event macro 17
+           wait 20
+           ;click on See goods
+           set %clickx #CONTPOSX + 395
+           set %clicky #CONTPOSY + 31
+           click %clickx %clicky dmc
+           wait 20
+           set %bag #CONTID
+           set %bagx #CONTPOSX
+           set %bagy #CONTPOSY
+           if small in %boddata
+           {
+            if shadow , #spc , iron in %boddata
+            {
+              gosub findbook shadow_iron
+              set %bookx 112
+              set %booky 51
+              wait 20
+              goto DragEvent
+            }
+            if dull , #spc , copper in %boddata
+            {
+              gosub findbook dull_copper
+              set %bookx 72
+              set %booky 51
+              wait 20
+              goto DragEvent
+            }
+            if iron in %boddata
+            {
+              gosub findbook iron
+              set %bookx 34
+              set %booky 51
+              wait 20
+              goto DragEvent
+            }
+            if copper in %boddata
+            {
+              gosub findbook copper
+              set %bookx 34
+              set %booky 94
+              wait 20
+              goto DragEvent
+            }
+            if bronze in %boddata
+            {
+              gosub findbook bronze
+              set %bookx 72
+              set %booky 94
+              wait 20
+              goto DragEvent
+            }
+            if gold in %boddata
+            {
+              gosub findbook gold
+              set %bookx 112
+              set %booky 94
+              wait 20
+              goto DragEvent
+            }
+            if agapite in %boddata
+            {
+              gosub findbook agapite
+              set %bookx 34
+              set %booky 137
+              wait 20
+              goto DragEvent
+            }
+            if verite in %boddata
+            {
+              gosub findbook verite
+              set %bookx 72
+              set %booky 137
+              wait 20
+              goto DragEvent
+            }
+            if valorite in %boddata
+            {
+              gosub findbook valorite
+              set %bookx 112
+              set %booky 137
+              wait 20
+              goto DragEvent
+            }
+           }; end if small blacksmith
+           else
+           {
+             gosub findbook large
+             set %bookx 152
+             set %booky 137
+             wait 20
+             goto DragEvent
+           } ; end else large blacksmith
+        } ; end if blacksmith
+        if #findcol = %carpentercolor
+        {
+           set #LOBJECTID %carpenterholder
+           event macro 17
+           wait 20
+           ;click on See goods
+           set %clickx #CONTPOSX + 395
+           set %clicky #CONTPOSY + 31
+           click %clickx %clicky dmc
+           wait 20
+           set %bag #CONTID
+           set %bagx #CONTPOSX
+           set %bagy #CONTPOSY
+          if small in %boddata
+          {
+            gosub findbook small
+            set %bookx 34
+            set %booky 51
+            wait 20
+            goto DragEvent
+          } ; end ifsmall carpenter
+          else
+          {
+            gosub findbook large
+            set %bookx 34
+            set %booky 137
+            wait 20
+            goto DragEvent
+          } ; end if large carpenter
+        }  ; end if carpenter
+        if #findcol = %tailorcolor
+        {
+           set #LOBJECTID %tailorholder
+           event macro 17
+           wait 20
+           ;click on See goods
+           set %clickx #CONTPOSX + 395
+           set %clicky #CONTPOSY + 31
+           click %clickx %clicky dmc
+           wait 20
+           set %bag #CONTID
+           set %bagx #CONTPOSX
+           set %bagy #CONTPOSY
+           if small in %boddata
+           {
+             if spined in %boddata
+            {
+              gosub findbook Spined
+              set %bookx 72
+              set %booky 51
+              wait 20
+              goto DragEvent
+
+            } ; end if
+            if horned in %boddata
+            {
+              gosub findbook horned
+              set %bookx 112
+              set %booky 51
+              wait 20
+              goto DragEvent
+            } ; end if
+            if barbed in %boddata
+            {
+              gosub findbook barbed
+              set %bookx 34
+              set %booky 94
+              wait 20
+              goto DragEvent
+            }; end if
+            if cloth in %boddata
+            {
+              gosub findbook cloth
+              set %bookx 72
+              set %booky 137
+              wait 20
+              goto DragEvent
+            } ; end if
+            else
+            {
+              gosub findbook normal
+              set %bookx 34
+              set %booky 51
+              wait 20
+              goto DragEvent
+            } ; end  else for normal leather
+           } ; end if for small tailor
+           else
+           {
+            gosub findbook large
+            set %bookx 152
+            set %booky 137
+            wait 20
+            goto DragEvent
+           } ; end else for large tailor
+        } ; end if for tailor
+        if #findcol = %boyercolor
+        {
+           set #LOBJECTID %boyerholder
+           ;display last object is #LOBJECTID and boyer is %boyerholder
+           event macro 17
+           wait 20
+           ;click on See goods
+           set %clickx #CONTPOSX + 395
+           set %clicky #CONTPOSY + 31
+           click %clickx %clicky dmc
+           wait 20
+           set %bag #CONTID
+           set %bagx #CONTPOSX
+           set %bagy #CONTPOSY
+           if small in %boddata
+           {
+             if oak in %boddata
+            {
+              gosub findbook oak
+              set %bookx 72
+              set %booky 51
+              wait 20
+              goto DragEvent
+
+            } ; end if
+            if ash in %boddata
+            {
+              gosub findbook ash
+              set %bookx 112
+              set %booky 51
+              wait 20
+              goto DragEvent
+            } ; end if
+            if yew in %boddata
+            {
+              gosub findbook yew
+              set %bookx 34
+              set %booky 94
+              wait 20
+              goto DragEvent
+            }  ; end if
+            if bloodwood in %boddata
+            {
+              gosub findbook bloodwood
+              set %bookx 72
+              set %booky 94
+              wait 20
+              goto DragEvent
+            } ; end if
+            if heartwood in %boddata
+            {
+              gosub findbook heartwood
+              set %bookx 112
+              set %booky 94
+              wait 20
+              goto DragEvent
+            } ; end if
+            else
+            {
+              gosub findbook normal
+              set %bookx 34
+              set %booky 51
+              wait 20
+              goto DragEvent
+            } ; end if normal wood
+           } ; end if small boyer
+           else
+           {
+            gosub findbook large
+            set %bookx 152
+            set %booky 137
+            wait 20
+            goto DragEvent
+           }  ; end else large boyer
+        } ; end if boyer
+        if #findcol = %tinkercolor
+        {
+           set #LOBJECTID %tinkerholder
+           event macro 17
+           wait 20
+           ;click on See goods
+           set %clickx #CONTPOSX + 395
+           set %clicky #CONTPOSY + 31
+           click %clickx %clicky dmc
+           wait 20
+           set %bag #CONTID
+           set %bagx #CONTPOSX
+           set %bagy #CONTPOSY
+           if small in %boddata
+           {
+            gosub findbook small_tinker
+            set %bookx 34
+            set %booky 51
+            wait 20
+            goto DragEvent
+           }  ; end if small tinker
+           else
+           {
+            gosub findbook large_tinker
+            set %bookx 34
+            set %booky 125
+            wait 20
+            goto DragEvent
+           } ; end else large tinker
+        } ; end if tinker
+        if #findcol = %scribecolor
+        {
+           set #LOBJECTID %scribeholder
+           event macro 17
+           wait 20
+           ;click on See goods
+           set %clickx #CONTPOSX + 395
+           set %clicky #CONTPOSY + 31
+           click %clickx %clicky dmc
+           wait 20
+           set %bag #CONTID
+           set %bagx #CONTPOSX
+           set %bagy #CONTPOSY
+           if small in %boddata
+           {
+            gosub findbook small_scribe
+            set %bookx 72
+            set %booky 51
+            wait 20
+            goto DragEvent
+           } ; end if small scribe
+           if large in %boddata
+           {
+            gosub findbook large_scribe
+            set %bookx 72
+            set %booky 125
+            wait 20
+            goto DragEvent
+           } ; end if large scribe
+        } ; end if scribe
+        if #findcol = %cookcolor
+        {
+           set #LOBJECTID %cookholder
+           event macro 17
+           wait 20
+           ;click on See goods
+           set %clickx #CONTPOSX + 395
+           set %clicky #CONTPOSY + 31
+           click %clickx %clicky dmc
+           wait 20
+           set %bag #CONTID
+           set %bagx #CONTPOSX
+           set %bagy #CONTPOSY
+           if small in %boddata
+           {
+            gosub findbook small_cook
+            set %bookx 112
+            set %booky 51
+            wait 20
+            goto DragEvent
+           } ; end if small cook
+           else
+           {
+            gosub findbook large_cook
+            set %bookx 112
+            set %booky 125
+            wait 20
+            goto DragEvent
+           }  ; end else large cook
+        } ; end if cook
+        if #findcol = %alchemistcolor
+        {
+           set #LOBJECTID %alchemyholder
+           event macro 17
+           wait 20
+           ;click on See goods
+           set %clickx #CONTPOSX + 395
+           set %clicky #CONTPOSY + 31
+           click %clickx %clicky dmc
+           wait 20
+           set %bag #CONTID
+           set %bagx #CONTPOSX
+           set %bagy #CONTPOSY
+           if small in %boddata
+           {
+            gosub findbook small_alchemist
+            set %bookx 152
+            set %booky 51
+            wait 20
+            goto DragEvent
+           } ; end if small alchemist
+           else
+           {
+            gosub findbook large_alchemist
+            set %bookx 152
+            set %booky 137
+            wait 20
+            goto DragEvent
+           } ; end else large alchemist
+        } ; end if alchemist
+        ; drag book to backpack and drop bod on book
+        DragEvent:
+        Exevent Drag %bookid
+        wait 20
+        Exevent Dropc #BACKPACKID
+        wait 1s
+        Exevent Drag %bodid
+        wait 20
+        Exevent Dropc %bookid
+        wait 20
+        ;close bod gump
+        set %clickx #CONTPOSX + 150
+        set %clicky #CONTPOSY + 150
+        click %clickx %clicky r
+        wait 20
+        ;drop book back on vendor
+        set #CONTID %bag
+        Exevent Drag %bookid
+        wait 30
+        Exevent Dropc %bag %bookx %booky
+        wait 20
+        key ESC
+        ;close vendor backpack
+        set %clickx #CONTPOSX + 50
+        set %clicky #CONTPOSY + 20
+        wait 20
+     } ; end for loop for bods in backpack
+     return
+
+; this look done
+;%1 should be typpe of material
+sub findbook
+  set %param %1
+  finditem DYM C_ , %bag
+  while #FINDINDEX < #FINDCNT + 1
+  {
+   gosub s7GetProperty #FINDID
+   set %bookprop #property
+   str lower %bookprop
+   set %bookprop #strres
+   if %param in %bookprop
+   {
+    set %bookid #FINDID
+    break
+   }
+   else
+   {
+    set #FINDINDEX #FINDINDEX + 1
+   }
+  }
+  return
+
+;uses runebook to recall ome by using the third rune in th4 runebook
+sub go_home
+    set #ltargetid %homeRuneBook
+    while #CHARPOSX <> 750 && #CHARPOSY <> 1367
+    {
+     event Macro 15 31
+     target 5s
+     set #LTARGETKIND 1
+     event Macro 22 0
+     wait 4s
+    }
+    return
+    
+sub bod_collect_jhelom
+    gosub collect_bods %scribeid
+    wait 2s
+    gosub go_home
+    wait 2s
+    gosub recall_to_cook
+    gosub collect_bods %cookid
+    wait 2s
+    return
+    
+sub recall_to_cook
+    ;use runebook on porch to go to jhelom
+     while #CHARPOSX <> 1366 && #CHARPOSY <> 3742
+     {
+      set #lobjectid %porchRuneBook
+      event Macro 17 0
+      wait 1s
+      set %bookx #CONTPOSX + 175
+      set %booky #CONTPOSY + 200
+      click %bookx %booky dmc
+      wait 3s
+      set %bookx #CONTPOSX + 139
+      set %booky #CONTPOSY + 144
+      click %bookx %booky dmc
+      wait 4s
+     }
+     return
+
+;works perfect
+sub house_to_luna
+    ;use runebook on porch to go to luna
+    set %x #CHARPOSX
+    set %y #CHARPOSY
+    repeat
+    {
+      set #lobjectid %porchRuneBook
+      event Macro 17 0
+      wait 1s
+      set %bookx #CONTPOSX + 138
+      set %booky #CONTPOSY + 200
+      click %bookx %booky dmc
+      wait 3s
+      set %bookx #CONTPOSX + 139
+      set %booky #CONTPOSY + 144
+      click %bookx %booky dmc
+      wait 6s
+    }
+    until #CHARPOSX <> %y || #CHARPOSY <> %y
+    return
+
+;bod collect sub works perfect
+sub luna_bod_collect
+    gosub collect_bods %blacksmithid
+    wait 2s
+    gosub collect_bods %tailorid
+    wait 2s
+    event PathFind 987 520 -50 2 10
+    wait 5s
+    gosub collect_bods %tinkerid
+    wait 1s
+    event PathFind 1001 520 -50 1 10
+    wait 5s
+    gosub collect_bods %alchemistid
+    wait 2s
+    gosub collect_bods %boyerid
+    wait 2s
+    gosub collect_bods %carpenterid
+    wait 2s
+    return
+
+;works perfect
+sub recall_to_jhelom
+    ;use runebook on porch to go to jhelom
+    set #lobjectid %porchRuneBook
+    event Macro 17 0
+    wait 1s
+    set %bookx #CONTPOSX + 138
+    set %booky #CONTPOSY + 200
+    click %bookx %booky dmc
+    wait 3s
+    set %bookx #CONTPOSX + 299
+    set %booky #CONTPOSY + 145
+    click %bookx %booky dmc
+    wait 4s
+    return
+
+
+;parameters %1 is vendor id to get bods from
+;works perfectly
+sub collect_bods
+    set %vendid %1
+    set %i 0
+    while %i < 3
+    {
+      Exevent Popup %vendid 0 0
+      wait 1s
+      SET %xclick #CONTPOSX + 26
+      set %yclick #CONTPOSY + 41
+      click %xclick %yclick dmc
+      wait 1s
+      set %yclick #CONTPOSY + #CONTSIZEY - 30
+      set %xclick #CONTPOSX + 80
+      set %xclickmax #CONTPOSX + #CONTSIZEX / 4
+      while %xclick < %xclickmax
+      {
+       click %xclick %yclick dmc
+       wait 1s
+       set %xclick %xclick + 20
+      }
+      set %i %i + 1
+    }
+    return
+
+;----
+;* @name s7GetProperty
+;* @author snicker7
+;* @ver 2.1 20080309
+;* @purpose	 failsafe method for obtaining property values.
+;* @params 	 %1	ID of item to get property of.
+;* @dependencies N/A
+;* @returns 	 N/A
+;* @notes 	 N/A
+;* @example: gosub s7GetProperty #findid
+;* @status done
+sub s7GetProperty
+	set !_7gpt #systime
+	event property %1
+	for !_7gp 1 1
+	{
+		if !_7gpt + 1500 < #systime
+			return #false
+		if #property = $ || no , #spc , significant in #property || no , #spc , data in #property || ( %0 > 1 && %0 = 2 && #property = %2 )
+			set !_7gp 0
+		if no , #spc , data in #property || ( %0 > 1 && %0 = 2 && #property = %2 )
+			event property %1
+	}
+return #true
